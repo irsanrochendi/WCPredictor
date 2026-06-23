@@ -1,0 +1,163 @@
+{% extends "base.html" %}
+
+{% block title %}{{ team }} - Team Profile{% endblock %}
+
+{% block content %}
+{% if not data %}
+<div class="card" style="text-align: center; padding: 48px;">
+    <h2>Team not found</h2>
+    <a href="/" class="btn btn-primary" style="margin-top: 16px;">← Back to Dashboard</a>
+</div>
+{% else %}
+<div class="hero">
+    <h1>{{ team }}</h1>
+    <p>{{ data.confederation }} | FIFA Rank #{{ data.fifa_rank }} | Elo: {{ data.elo }}</p>
+</div>
+
+<!-- Quick Stats -->
+<div class="grid-4" style="margin-bottom: 32px;">
+    <div class="stat-card">
+        <div class="stat-value">{{ strength.overall }}</div>
+        <div class="stat-label">Strength Score</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-value">{{ data.wc_titles }}</div>
+        <div class="stat-label">WC Titles</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-value">{{ data.avg_player_rating }}</div>
+        <div class="stat-label">Avg Player Rating</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-value">{{ data.last_best }}</div>
+        <div class="stat-label">Best Result</div>
+    </div>
+</div>
+
+<div class="grid-2">
+    <!-- Strength Breakdown -->
+    <div class="card">
+        <div class="card-title">📊 Strength Breakdown</div>
+        {% for metric, value in strength.breakdown.items() %}
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+            <span style="font-size: 0.85rem; color: var(--text-secondary);">{{ metric | replace('_', ' ') | title }}</span>
+            <div style="display: flex; align-items: center; gap: 8px;">
+                <div class="progress-bar" style="width: 150px;">
+                    <div class="progress-fill {% if value > 80 %}progress-green{% elif value > 60 %}progress-blue{% elif value > 40 %}progress-yellow{% else %}progress-red{% endif %}" style="width: {{ value }}%;"></div>
+                </div>
+                <span style="font-size: 0.85rem; font-weight: 600; width: 36px; text-align: right;">{{ value }}</span>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    <!-- Team Info -->
+    <div class="card">
+        <div class="card-title">ℹ️ Team Information</div>
+        <table>
+            <tr><td style="color: var(--text-muted);">Confederation</td><td><span class="badge badge-blue">{{ data.confederation }}</span></td></tr>
+            <tr><td style="color: var(--text-muted);">FIFA Rank</td><td>#{{ data.fifa_rank }}</td></tr>
+            <tr><td style="color: var(--text-muted);">Elo Rating</td><td>{{ data.elo }}</td></tr>
+            <tr><td style="color: var(--text-muted);">WC Titles</td><td>{{ data.wc_titles }}x</td></tr>
+            <tr><td style="color: var(--text-muted);">Best Result</td><td>{{ data.last_best }}</td></tr>
+            <tr><td style="color: var(--text-muted);">Squad Depth</td><td>{{ data.squad_depth }}/100</td></tr>
+            <tr><td style="color: var(--text-muted);">Coach Rating</td><td>{{ data.coach_rating }}/100</td></tr>
+            <tr><td style="color: var(--text-muted);">Goals (last 10)</td><td>{{ data.goals_scored_10 }} scored, {{ data.goals_conceded_10 }} conceded</td></tr>
+        </table>
+    </div>
+</div>
+
+<!-- Key Players -->
+<div class="card">
+    <div class="card-title">⭐ Key Players</div>
+    <div class="grid-4">
+        {% for player in data.key_players %}
+        <div style="background: var(--bg-secondary); border-radius: 10px; padding: 16px; text-align: center;">
+            <div style="font-size: 2rem; margin-bottom: 8px;">👤</div>
+            <a href="/player/{{ player }}" style="color: var(--text-primary); text-decoration: none; font-weight: 600; font-size: 0.9rem;">
+                {{ player }}
+            </a>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+<!-- WC History -->
+{% if history.titles > 0 or history.appearances > 0 %}
+<div class="card">
+    <div class="card-title">🏆 World Cup History</div>
+    <div class="grid-4">
+        <div class="stat-card">
+            <div class="stat-value">{{ history.titles }}</div>
+            <div class="stat-label">Titles</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-value">{{ history.runner_up }}</div>
+            <div class="stat-label">Runner-up</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-value">{{ history.semi_finals }}</div>
+            <div class="stat-label">Semi-finals</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-value">{{ history.appearances }}</div>
+            <div class="stat-label">Appearances</div>
+        </div>
+    </div>
+    {% if history.years_won %}
+    <div style="margin-top: 16px;">
+        <span style="color: var(--text-muted); font-size: 0.85rem;">Years Won: </span>
+        {% for year in history.years_won %}
+        <span class="badge badge-gold">{{ year }}</span>
+        {% endfor %}
+    </div>
+    {% endif %}
+</div>
+{% endif %}
+
+<!-- Match Predictions -->
+<div class="card">
+    <div class="card-title">🔮 Predicted Results vs All Teams</div>
+    <table>
+        <thead>
+            <tr>
+                <th>Opponent</th>
+                <th>Win</th>
+                <th>Draw</th>
+                <th>Lose</th>
+                <th>xG For</th>
+                <th>xG Against</th>
+                <th>Confidence</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for match in match_preds %}
+            <tr>
+                <td>
+                    <a href="/team/{{ match.opponent }}" style="color: var(--text-primary); text-decoration: none; font-weight: 500;">
+                        {{ match.opponent }}
+                    </a>
+                </td>
+                <td>
+                    <span style="color: var(--accent-green); font-weight: 600;">{{ match.home_win }}%</span>
+                </td>
+                <td>
+                    <span style="color: var(--text-secondary);">{{ match.draw }}%</span>
+                </td>
+                <td>
+                    <span style="color: var(--accent-red);">{{ match.away_win }}%</span>
+                </td>
+                <td>{{ match.expected_goals_home }}</td>
+                <td>{{ match.expected_goals_away }}</td>
+                <td>
+                    <span class="badge {% if match.confidence > 70 %}badge-green{% elif match.confidence > 50 %}badge-blue{% else %}badge-yellow{% endif %}">
+                        {{ match.confidence }}%
+                    </span>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endif %}
+{% endblock %}

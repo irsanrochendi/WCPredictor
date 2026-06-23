@@ -1,0 +1,85 @@
+{% extends "base.html" %}
+
+{% block title %}{{ player }} - Player Profile{% endblock %}
+
+{% block content %}
+{% if not data %}
+<div class="card" style="text-align: center; padding: 48px;">
+    <h2>Player not found</h2>
+    <a href="/players" class="btn btn-primary" style="margin-top: 16px;">← All Players</a>
+</div>
+{% else %}
+<div class="card" style="max-width: 800px; margin: 0 auto;">
+    <div style="display: flex; align-items: center; gap: 24px; margin-bottom: 32px;">
+        <div style="width: 100px; height: 100px; border-radius: 50%; background: linear-gradient(135deg, #10b981, #3b82f6); display: flex; align-items: center; justify-content: center; font-size: 2.5rem; font-weight: 800; color: white;">
+            {{ player[0] }}
+        </div>
+        <div>
+            <h1 style="font-size: 2rem; margin-bottom: 4px;">{{ player }}</h1>
+            <p style="color: var(--text-muted);">{{ data.country }} | {{ data.position }} | Age {{ data.age }}</p>
+            <p style="color: var(--text-muted);">🏟️ {{ data.club }}</p>
+        </div>
+        <div style="margin-left: auto; text-align: center;">
+            <div style="font-size: 3rem; font-weight: 900; background: linear-gradient(135deg, #10b981, #3b82f6); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">{{ data.rating }}</div>
+            <div style="color: var(--text-muted); font-size: 0.8rem;">RATING</div>
+        </div>
+    </div>
+
+    <p style="color: var(--text-secondary); margin-bottom: 24px; font-style: italic;">{{ data.description }}</p>
+
+    <!-- International Stats -->
+    <h3 style="margin-bottom: 16px;">🌍 International Career</h3>
+    <div class="grid-3" style="margin-bottom: 24px;">
+        <div class="stat-card">
+            <div class="stat-value">{{ data.caps }}</div>
+            <div class="stat-label">Caps</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-value">{{ data.goals }}</div>
+            <div class="stat-label">Goals</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-value">{{ "%.2f"|format(data.goals / data.caps) }}</div>
+            <div class="stat-label">Goals per Game</div>
+        </div>
+    </div>
+
+    <!-- World Cup Stats -->
+    <h3 style="margin-bottom: 16px;">🏆 World Cup Stats</h3>
+    <div class="grid-3" style="margin-bottom: 24px;">
+        <div class="stat-card">
+            <div class="stat-value">{{ data.wc_appearances }}</div>
+            <div class="stat-label">Tournaments</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-value">{{ data.wc_goals }}</div>
+            <div class="stat-label">WC Goals</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-value">{{ data.wc_assists }}</div>
+            <div class="stat-label">WC Assists</div>
+        </div>
+    </div>
+
+    <!-- Achievements -->
+    <h3 style="margin-bottom: 16px;">🏅 Key Achievements</h3>
+    <div style="display: flex; flex-wrap: wrap; gap: 8px;">
+        {% if data.ballon_dor > 0 %}
+        <span class="badge badge-gold">🌟 Ballon d'Or: {{ data.ballon_dor }}x</span>
+        {% endif %}
+        {% if data.wc_goals > 0 %}
+        <span class="badge badge-green">⚽ WC Goals: {{ data.wc_goals }}</span>
+        {% endif %}
+        {% if data.goals > 50 %}
+        <span class="badge badge-blue">🎯 50+ International Goals</span>
+        {% endif %}
+        {% if data.caps > 100 %}
+        <span class="badge badge-purple">💯 100+ Caps</span>
+        {% endif %}
+        {% if data.age < 25 %}
+        <span class="badge badge-red">⭐ Rising Star ({{ data.age }})</span>
+        {% endif %}
+    </div>
+</div>
+{% endif %}
+{% endblock %}

@@ -1,0 +1,201 @@
+{% extends "base.html" %}
+
+{% block title %}Simulasi Lengkap WC2026{% endblock %}
+
+{% block content %}
+<div class="hero">
+    <h1>🏆 Simulasi Lengkap Piala Dunia 2026</h1>
+    <p>Fase Grup → 32 Besar → 16 Besar → 8 Besar → Semi Final → Final → Juara</p>
+</div>
+
+<!-- Simulation Controls -->
+<div class="card" style="max-width: 500px; margin: 0 auto 32px; text-align: center;">
+    <div class="card-title" style="justify-content: center;">⚙️ Pengaturan Simulasi</div>
+    <div class="form-group" style="max-width: 280px; margin: 0 auto;">
+        <label>Jumlah Simulasi</label>
+        <select id="simCount">
+            <option value="500">500 (Cepat)</option>
+            <option value="1000" selected>1,000</option>
+            <option value="2000">2,000</option>
+            <option value="5000">5,000 (Akurat)</option>
+        </select>
+    </div>
+    <button type="button" class="btn btn-primary" style="margin-top: 16px; padding: 10px 32px; font-size: 1rem;" onclick="runSimulation()">
+        🚀 Jalankan Simulasi
+    </button>
+    <p style="color: var(--text-muted); font-size: 0.75rem; margin-top: 8px;">
+        Format: 12 grup × 4 tim → Top 2 + 8 posisi 3 terbaik = 32 tim → Knockout
+    </p>
+</div>
+
+<!-- Loading -->
+<div id="simLoading" style="display: none; text-align: center; padding: 32px;">
+    <div class="spinner" style="margin: 0 auto 16px;"></div>
+    <p style="color: var(--text-secondary);" id="simStatus">Menjalankan simulasi...</p>
+</div>
+
+<!-- Results -->
+<div id="simResults" style="display: none;">
+
+    <!-- Champion Highlight -->
+    <div class="card" style="text-align: center; background: linear-gradient(135deg, rgba(245,158,11,0.15), rgba(245,158,11,0.05)); border-color: rgba(245,158,11,0.4);">
+        <div class="card-title" style="justify-content: center;">🏆 Prediksi Juara</div>
+        <div id="championDisplay" style="font-size: 2.5rem; font-weight: 900; background: linear-gradient(135deg, #f59e0b, #fbbf24); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin: 12px 0;"></div>
+        <div id="championProb" style="color: var(--text-secondary); font-size: 0.9rem;"></div>
+    </div>
+
+    <!-- Bracket -->
+    <div class="card">
+        <div class="card-title">📊 Bagan Fase Gugur (Sample 1 Simulasi)</div>
+        <div style="overflow-x: auto; padding: 12px 0;">
+            <div id="bracketDisplay" style="display: flex; gap: 12px; min-width: 900px; justify-content: flex-start; padding: 0 16px;">
+            </div>
+        </div>
+    </div>
+
+    <!-- Probabilities Table -->
+    <div class="card">
+        <div class="card-title">📋 Tabel Probabilitas Lengkap</div>
+        <div style="overflow-x: auto;">
+            <table style="font-size: 0.85rem;">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Tim</th>
+                        <th>Lolos</th>
+                        <th>16B</th>
+                        <th>8B</th>
+                        <th>SF</th>
+                        <th>Final</th>
+                        <th>Juara</th>
+                    </tr>
+                </thead>
+                <tbody id="resultsBody"></tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Groups -->
+<div class="card">
+    <div class="card-title">📋 Grup Kualifikasi FIFA World Cup 2026</div>
+    <div class="grid-3">
+        {% for group_name, teams in groups.items() %}
+        <div class="group-card">
+            <div class="group-title">{{ group_name }}</div>
+            {% for team in teams %}
+            <div class="group-team">
+                <a href="/team/{{ team }}" style="color: var(--text-primary); text-decoration: none; font-size: 0.9rem;">{{ team }}</a>
+            </div>
+            {% endfor %}
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function runSimulation() {
+    const simCount = document.getElementById('simCount').value;
+    document.getElementById('simLoading').style.display = 'block';
+    document.getElementById('simResults').style.display = 'none';
+    const startTime = Date.now();
+    fetch('/api/simulate', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ simulations: parseInt(simCount) })
+    })
+    .then(r => r.json())
+    .then(data => {
+        const elapsed = ((Date.now() - startTime) / 1000).toFixed(1);
+        document.getElementById('simStatus').textContent = 'Selesai dalam ' + elapsed + 's';
+        displayResults(data);
+        document.getElementById('simResults').style.display = 'block';
+        document.getElementById('simLoading').style.display = 'none';
+    })
+    .catch(err => {
+        document.getElementById('simStatus').textContent = 'Error: ' + err.message;
+        document.getElementById('simLoading').style.display = 'none';
+    });
+}
+
+function displayResults(data) {
+    const probs = data.probabilities;
+    const bracket = data.bracket;
+    const tbody = document.getElementById('resultsBody');
+    tbody.innerHTML = '';
+
+    const sorted = Object.entries(probs).sort((a, b) => b[1].winner - a[1].winner);
+
+    if (sorted.length > 0) {
+        document.getElementById('championDisplay').textContent = sorted[0][0];
+        document.getElementById('championProb').textContent = 'Peluang juara: ' + sorted[0][1].winner + '% | Peluang lolos: ' + sorted[0][1].qualified + '%';
+    }
+
+    displayBracket(bracket);
+
+    let rank = 1;
+    for (const [team, p] of sorted) {
+        if (p.qualified === 0) continue; // skip teams that never qualify
+        const tr = document.createElement('tr');
+        tr.innerHTML = '<td><strong>' + rank + '</strong></td>' +
+            '<td><a href="/team/' + team + '" style="color:var(--text-primary);text-decoration:none;font-weight:500;">' + team + '</a></td>' +
+            '<td><strong>' + p.qualified + '%</strong></td>' +
+            '<td style="color:var(--text-secondary);">' + p.r16 + '%</td>' +
+            '<td style="color:var(--text-secondary);">' + p.qf + '%</td>' +
+            '<td style="color:var(--accent-purple);">' + p.sf + '%</td>' +
+            '<td style="color:var(--accent-blue);">' + p.final + '%</td>' +
+            '<td><strong style="color:var(--accent-green);">' + p.winner + '%</strong></td>';
+        tbody.appendChild(tr);
+        rank++;
+    }
+}
+
+function displayBracket(bracket) {
+    const container = document.getElementById('bracketDisplay');
+    container.innerHTML = '';
+
+    const stages = [
+        { label: '32 Besar', items: bracket.r32 || [] },
+        { label: '16 Besar', items: bracket.r16 || [] },
+        { label: '8 Besar', items: bracket.qf || [] },
+        { label: 'Semi Final', items: bracket.sf || [] },
+        { label: 'Final', items: bracket.final ? [bracket.final] : [] },
+    ];
+
+    const paddings = ['0px', '20px', '40px', '80px', '120px'];
+
+    stages.forEach((stage, idx) => {
+        const col = document.createElement('div');
+        col.style.cssText = 'display:flex;flex-direction:column;gap:6px;min-width:160px;padding-top:' + paddings[idx] + ';';
+
+        const title = document.createElement('div');
+        title.style.cssText = 'font-weight:700;font-size:0.75rem;color:var(--accent-blue);text-align:center;margin-bottom:8px;text-transform:uppercase;letter-spacing:0.05em;';
+        title.textContent = stage.label;
+        col.appendChild(title);
+
+        stage.items.forEach(m => {
+            const box = document.createElement('div');
+            box.style.cssText = 'background:var(--bg-secondary);border:1px solid var(--border);border-radius:6px;padding:6px 8px;min-width:150px;';
+
+            const homeWin = m.home === m.winner;
+            const awayWin = m.away === m.winner;
+
+            box.innerHTML =
+                '<div style="display:flex;justify-content:space-between;align-items:center;padding:2px 0;border-bottom:1px solid rgba(42,53,72,0.3);">' +
+                    '<span style="font-size:0.72rem;font-weight:' + (homeWin ? '700' : '400') + ';color:' + (homeWin ? 'var(--accent-green)' : 'var(--text-primary)') + ';">' + (m.home || 'TBD') + '</span>' +
+                    (homeWin ? '<span style="font-size:0.6rem;">✅</span>' : '') +
+                '</div>' +
+                '<div style="display:flex;justify-content:space-between;align-items:center;padding:2px 0;">' +
+                    '<span style="font-size:0.72rem;font-weight:' + (awayWin ? '700' : '400') + ';color:' + (awayWin ? 'var(--accent-green)' : 'var(--text-primary)') + ';">' + (m.away || 'TBD') + '</span>' +
+                    (awayWin ? '<span style="font-size:0.6rem;">✅</span>' : '') +
+                '</div>';
+
+            col.appendChild(box);
+        });
+
+        container.appendChild(col);
+    });
+}
+</script>
+{% endblock %}

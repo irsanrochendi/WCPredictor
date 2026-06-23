@@ -1,0 +1,216 @@
+{% extends "base.html" %}
+
+{% block title %}Match Prediction - World Cup 2026{% endblock %}
+
+{% block content %}
+<div class="hero">
+    <h1>🔮 Match Predictor</h1>
+    <p>Select two teams and optionally enter betting odds for the most accurate prediction</p>
+</div>
+
+<!-- Prediction Form -->
+<div class="card" style="max-width: 900px; margin: 0 auto 32px;">
+    <div class="card-title">⚽ Select Match</div>
+    <form action="/predict" method="POST">
+        <div class="grid-2" style="gap: 16px; align-items: end;">
+            <div class="form-group">
+                <label>🏠 Home Team</label>
+                <select name="home_team" required>
+                    <option value="">Select team...</option>
+                    {% for team in teams %}
+                    <option value="{{ team }}" {% if team == home_team %}selected{% endif %}>{{ team }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="form-group">
+                <label>✈️ Away Team</label>
+                <select name="away_team" required>
+                    <option value="">Select team...</option>
+                    {% for team in teams %}
+                    <option value="{{ team }}" {% if team == away_team %}selected{% endif %}>{{ team }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+        </div>
+
+        <div style="text-align: center; margin: 16px 0; color: var(--text-muted); font-size: 0.85rem;">
+            — Optional: Enter betting odds for more accurate predictions —
+        </div>
+
+        <div class="grid-3" style="gap: 16px;">
+            <div class="form-group">
+                <label>Home Win Odds</label>
+                <input type="number" name="home_odds" step="0.01" placeholder="e.g. 2.50" value="{{ home_odds }}">
+            </div>
+            <div class="form-group">
+                <label>Draw Odds</label>
+                <input type="number" name="draw_odds" step="0.01" placeholder="e.g. 3.20" value="{{ draw_odds }}">
+            </div>
+            <div class="form-group">
+                <label>Away Win Odds</label>
+                <input type="number" name="away_odds" step="0.01" placeholder="e.g. 2.80" value="{{ away_odds }}">
+            </div>
+        </div>
+
+        <div style="text-align: center; margin-top: 20px;">
+            <button type="submit" class="btn btn-primary" style="padding: 12px 40px; font-size: 1.05rem;">
+                🔮 Predict Match
+            </button>
+        </div>
+    </form>
+</div>
+
+{% if prediction %}
+<!-- Prediction Results -->
+<div style="max-width: 1100px; margin: 0 auto;">
+    <!-- Main Prediction Bar -->
+    <div class="card" style="text-align: center;">
+        <div class="card-title" style="justify-content: center;">
+            {{ prediction.home_team }} vs {{ prediction.away_team }}
+        </div>
+
+        <div class="prediction-bar" style="max-width: 700px; margin: 20px auto;">
+            <div class="prediction-segment seg-home" style="width: {{ prediction.prediction.home_win }}%;">
+                {{ prediction.prediction.home_win }}% {{ prediction.home_team }}
+            </div>
+            <div class="prediction-segment seg-draw" style="width: {{ prediction.prediction.draw }}%;">
+                {{ prediction.prediction.draw }}% Draw
+            </div>
+            <div class="prediction-segment seg-away" style="width: {{ prediction.prediction.away_win }}%;">
+                {{ prediction.prediction.away_win }}% {{ prediction.away_team }}
+            </div>
+        </div>
+
+        <div class="grid-3" style="max-width: 600px; margin: 0 auto;">
+            <div>
+                <div style="font-size: 1.8rem; font-weight: 800; color: var(--accent-green);">{{ prediction.prediction.home_win }}%</div>
+                <div style="color: var(--text-muted); font-size: 0.85rem;">{{ prediction.home_team }} Win</div>
+            </div>
+            <div>
+                <div style="font-size: 1.8rem; font-weight: 800; color: var(--text-secondary);">{{ prediction.prediction.draw }}%</div>
+                <div style="color: var(--text-muted); font-size: 0.85rem;">Draw</div>
+            </div>
+            <div>
+                <div style="font-size: 1.8rem; font-weight: 800; color: var(--accent-red);">{{ prediction.prediction.away_win }}%</div>
+                <div style="color: var(--text-muted); font-size: 0.85rem;">{{ prediction.away_team }} Win</div>
+            </div>
+        </div>
+
+        <div style="margin-top: 20px;">
+            <span class="badge badge-blue">Confidence: {{ prediction.confidence }}%</span>
+            <span class="badge badge-green">BTTS: {{ prediction.btts }}%</span>
+        </div>
+    </div>
+
+    <!-- Details Grid -->
+    <div class="grid-2">
+        <!-- Expected Goals & Scorelines -->
+        <div class="card">
+            <div class="card-title">🎯 Expected Goals & Scorelines</div>
+            <div class="grid-2" style="margin-bottom: 20px;">
+                <div style="text-align: center;">
+                    <div style="font-size: 2rem; font-weight: 800; color: var(--accent-green);">{{ prediction.expected_goals.home }}</div>
+                    <div style="color: var(--text-muted); font-size: 0.85rem;">xG {{ prediction.home_team }}</div>
+                </div>
+                <div style="text-align: center;">
+                    <div style="font-size: 2rem; font-weight: 800; color: var(--accent-red);">{{ prediction.expected_goals.away }}</div>
+                    <div style="color: var(--text-muted); font-size: 0.85rem;">xG {{ prediction.away_team }}</div>
+                </div>
+            </div>
+
+            <h4 style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 10px;">Most Likely Scores</h4>
+            {% for score in prediction.most_likely_scores %}
+            <div class="scoreline">
+                <span class="scoreline-score">{{ score.score }}</span>
+                <div style="flex: 1; margin: 0 12px;">
+                    <div class="progress-bar">
+                        <div class="progress-fill progress-blue" style="width: {{ score.probability * 3 }}%;"></div>
+                    </div>
+                </div>
+                <span class="scoreline-prob">{{ score.probability }}%</span>
+            </div>
+            {% endfor %}
+
+            <div style="margin-top: 16px;">
+                <h4 style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 10px;">Over/Under 2.5 Goals</h4>
+                <div style="display: flex; gap: 12px;">
+                    <div style="flex: 1; text-align: center; padding: 12px; background: var(--bg-secondary); border-radius: 8px;">
+                        <div style="font-weight: 700; color: var(--accent-green);">{{ prediction.over_under_25.over }}%</div>
+                        <div style="font-size: 0.8rem; color: var(--text-muted);">Over 2.5</div>
+                    </div>
+                    <div style="flex: 1; text-align: center; padding: 12px; background: var(--bg-secondary); border-radius: 8px;">
+                        <div style="font-weight: 700; color: var(--accent-red);">{{ prediction.over_under_25.under }}%</div>
+                        <div style="font-size: 0.8rem; color: var(--text-muted);">Under 2.5</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Model Breakdown -->
+        <div class="card">
+            <div class="card-title">🤖 Model Breakdown</div>
+
+            {% for model_name, probs in prediction.model_breakdown.items() %}
+            {% if probs.home is not none %}
+            <div style="margin-bottom: 20px;">
+                <h4 style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 8px; text-transform: uppercase;">
+                    {{ model_name }} Model
+                </h4>
+                <div style="display: flex; gap: 8px;">
+                    <div style="flex: 1; text-align: center; padding: 8px; background: rgba(16, 185, 129, 0.1); border-radius: 6px;">
+                        <div style="font-weight: 700; font-size: 0.9rem; color: var(--accent-green);">{{ probs.home }}%</div>
+                        <div style="font-size: 0.7rem; color: var(--text-muted);">Home</div>
+                    </div>
+                    <div style="flex: 1; text-align: center; padding: 8px; background: rgba(100, 116, 139, 0.1); border-radius: 6px;">
+                        <div style="font-weight: 700; font-size: 0.9rem; color: var(--text-secondary);">{{ probs.draw }}%</div>
+                        <div style="font-size: 0.7rem; color: var(--text-muted);">Draw</div>
+                    </div>
+                    <div style="flex: 1; text-align: center; padding: 8px; background: rgba(239, 68, 68, 0.1); border-radius: 6px;">
+                        <div style="font-weight: 700; font-size: 0.9rem; color: var(--accent-red);">{{ probs.away }}%</div>
+                        <div style="font-size: 0.7rem; color: var(--text-muted);">Away</div>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+            {% endfor %}
+
+            <div style="margin-top: 16px; padding: 16px; background: var(--bg-secondary); border-radius: 10px;">
+                <h4 style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 8px;">How it works</h4>
+                <ul style="font-size: 0.8rem; color: var(--text-muted); padding-left: 16px; line-height: 1.8;">
+                    <li><strong>Elo:</strong> FIFA-style rating system with goal margin</li>
+                    <li><strong>Strength:</strong> Player ratings, form, squad depth</li>
+                    <li><strong>Poisson:</strong> Statistical goal distribution model</li>
+                    <li><strong>Odds:</strong> Bookmaker odds with vig removed</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- Team Strength Comparison -->
+    <div class="card">
+        <div class="card-title">⚖️ Team Strength Comparison</div>
+        <div class="grid-2">
+            {% for team_name, strength in prediction.team_strengths.items() %}
+            <div>
+                <h4 style="margin-bottom: 12px; color: {% if loop.index == 1 %}var(--accent-green){% else %}var(--accent-red){% endif %};">
+                    {{ team_name }}
+                    <span style="font-size: 1.5rem; float: right;">{{ strength.overall }}</span>
+                </h4>
+                {% for metric, value in strength.breakdown.items() %}
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                    <span style="font-size: 0.8rem; color: var(--text-muted);">{{ metric | replace('_', ' ') | title }}</span>
+                    <div style="display: flex; align-items: center; gap: 8px;">
+                        <div class="progress-bar" style="width: 100px;">
+                            <div class="progress-fill {% if value > 75 %}progress-green{% elif value > 50 %}progress-blue{% elif value > 25 %}progress-yellow{% else %}progress-red{% endif %}" style="width: {{ value }}%;"></div>
+                        </div>
+                        <span style="font-size: 0.8rem; font-weight: 600; width: 32px; text-align: right;">{{ value }}</span>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+{% endif %}
+{% endblock %}
