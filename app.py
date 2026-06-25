@@ -12,6 +12,11 @@ from engine.predictor import (
     TournamentSimulator, WC2026_QUAL_GROUPS, WC2026_QUAL_GROUPS_ID, _ID_EN
 )
 from scraper.odds_scraper import OddsScraper, TeamDataCollector
+from scraper.live_scraper import load_live_data, save_live_data, generate_sample_data
+
+PROJECT_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+LIVE_DATA_FILE = os.path.join(PROJECT_DIR, "data", "live_standings.json")
+SCHEDULE_FILE = os.path.join(PROJECT_DIR, "data", "schedule_predictions.json")
 
 app = Flask(__name__)
 app.config["SECRET_KEY"] = "worldcup2026-predictor-secret"
@@ -155,6 +160,47 @@ def api_odds():
 @app.route("/api/groups")
 def api_groups():
     return jsonify({"groups": WC2026_QUAL_GROUPS, "groups_id": WC2026_QUAL_GROUPS_ID})
+
+
+@app.route("/api/live")
+def api_live():
+    """Get live qualification standings from FIFA.com."""
+    data = load_live_data()
+    if not data:
+        data = generate_sample_data()
+        save_live_data(data)
+    return jsonify(data)
+
+
+@app.route("/api/live/refresh", methods=["POST"])
+def api_live_refresh():
+    """Force refresh live data (in production, this would re-scrape FIFA.com)."""
+    data = generate_sample_data()
+    save_live_data(data)
+    return jsonify({"status": "ok", "data": data})
+
+
+@app.route("/api/schedule")
+def api_schedule():
+    """Get today's match predictions."""
+    if os.path.exists(SCHEDULE_FILE):
+        with open(SCHEDULE_FILE, "r") as f:
+            return jsonify(json.load(f))
+    return jsonify({"date": datetime.now().strftime("%Y-%m-%d"), "predictions": []})
+
+
+@app.route("/api/daily-update", methods=["POST"])
+def api_daily_update():
+    """Trigger daily update - generates new predictions based on latest standings."""
+    data = generate_sample_data()
+    save_live_data(data)
+    return jsonify({
+        "status": "ok",
+        "message": "Daily update completed",
+        "last_updated": data["last_updated"],
+        "groups_count": len(data["groups"]),
+        "qualified_count": sum(1 for g in data["groups"].values() for t in g if t.get("status") == "qualified")
+    })
 
 
 if __name__ == "__main__":

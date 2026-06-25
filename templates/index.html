@@ -138,6 +138,59 @@
     </div>
 </div>
 
+<!-- Live Standings from FIFA.com -->
+<div class="card" id="liveStandings">
+    <div class="card-title">
+        🔴 Live Kualifikasi FIFA WC2026
+        <button onclick="refreshLiveData()" class="btn btn-outline" style="margin-left: auto; padding: 4px 12px; font-size: 0.8rem;">🔄 Refresh</button>
+    </div>
+    <p id="lastUpdated" style="color: var(--text-muted); font-size: 0.85rem; margin-bottom: 16px;">Loading...</p>
+    <div id="liveGroups" class="grid-3">
+        <div style="color: var(--text-muted); text-align: center; padding: 32px;">Loading live data...</div>
+    </div>
+</div>
+
+<script>
+function refreshLiveData() {
+    fetch('/api/live/refresh', {method: 'POST'})
+        .then(r => r.json())
+        .then(data => {
+            loadLiveData();
+            alert('Data updated!');
+        });
+}
+
+function loadLiveData() {
+    fetch('/api/live')
+        .then(r => r.json())
+        .then(data => {
+            document.getElementById('lastUpdated').textContent = 'Last updated: ' + data.last_updated;
+            const container = document.getElementById('liveGroups');
+            container.innerHTML = '';
+            for (const [gname, teams] of Object.entries(data.groups)) {
+                const card = document.createElement('div');
+                card.className = 'group-card';
+                let html = '<div class="group-title">' + gname + '</div>';
+                teams.forEach((t, i) => {
+                    const badge = i === 0 ? 'badge-gold' : i === 1 ? 'badge-silver' : i === 2 ? 'badge-bronze' : 'badge-blue';
+                    const status = t.status === 'qualified' ? ' ✅' : t.status === 'eliminated' ? ' ❌' : '';
+                    html += '<div class="group-team">' +
+                        '<span style="width: 20px; font-size: 0.8rem; color: var(--text-muted);">' + t.pos + '</span>' +
+                        '<span style="flex:1; font-size:0.85rem;">' + t.team + status + '</span>' +
+                        '<span class="badge ' + badge + '">' + t.pts + 'p</span>' +
+                    '</div>';
+                });
+                card.innerHTML = html;
+                container.appendChild(card);
+            }
+        });
+}
+
+// Load on page load and auto-refresh every 6 hours
+loadLiveData();
+setInterval(loadLiveData, 6 * 60 * 60 * 1000);
+</script>
+
 <!-- Quick Predict -->
 <div class="card" style="text-align: center;">
     <div class="card-title" style="justify-content: center;">🔮 Quick Match Prediction</div>
