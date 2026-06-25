@@ -4,7 +4,7 @@ Data source: FIFA.com live qualification standings (June 2026)
 """
 import json, os, sys, random, time
 from datetime import datetime
-from flask import Flask, render_template, request, jsonify, redirect, url_for
+from flask import Flask, render_template, request, jsonify, redirect, url_for, send_from_directory
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from engine.predictor import (
@@ -162,48 +162,8 @@ def api_odds():
 
 @app.route("/live-predictions")
 def live_predictions():
-    """Live predictions based on current FIFA standings — includes knockout bracket."""
-    live_data = load_live_data()
-    if not live_data:
-        live_data = generate_sample_data()
-        save_live_data(live_data)
-    
-    # Generate predictions for each group
-    group_predictions = []
-    for gname, teams in live_data.get("groups", {}).items():
-        active_teams = [t for t in teams if t.get("status") not in ["qualified", "eliminated"]]
-        if len(active_teams) >= 2:
-            matches = []
-            for i in range(len(active_teams)):
-                for j in range(i + 1, len(active_teams)):
-                    t1 = active_teams[i]
-                    t2 = active_teams[j]
-                    pred = predictor.predict_match(t1["team"], t2["team"])
-                    matches.append({
-                        "home": t1["team"], "away": t2["team"],
-                        "prediction": pred["prediction"],
-                        "expected_goals": pred["expected_goals"],
-                        "btts": pred["btts"],
-                        "over_under_25": pred["over_under_25"],
-                        "most_likely_scores": pred["most_likely_scores"][:3],
-                        "home_elo": TeamStrengthAnalyzer.get_team(t1["team"]).get("elo", 1500),
-                        "away_elo": TeamStrengthAnalyzer.get_team(t2["team"]).get("elo", 1500),
-                    })
-            group_predictions.append({"group": gname, "matches": matches, "teams": teams})
-    
-    # Generate qualification predictions
-    qualification_preds = generate_qualification_predictions(live_data)
-    
-    # Run knockout simulation based on current standings
-    knockout_sim = run_knockout_simulation(live_data)
-    
-    return render_template("live_predictions.html", 
-        live_data=live_data,
-        group_predictions=group_predictions,
-        qualification_preds=qualification_preds,
-        knockout_sim=knockout_sim,
-        now=datetime.now().strftime("%B %d, %Y %H:%M UTC")
-    )
+    """Serve the fully client-side live predictions page."""
+    return send_from_directory(os.path.join(PROJECT_DIR, "static"), "live.html")
 
 
 def run_knockout_simulation(live_data):

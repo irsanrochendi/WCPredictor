@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Live Prediction - WC2026</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <style>
+        :root{--bg-primary:#0a0e1a;--bg-secondary:#111827;--bg-card:#1a2235;--text-primary:#f1f5f9;--text-secondary:#94a3b8;--text-muted:#64748b;--accent-green:#10b981;--accent-red:#ef4444;--accent-yellow:#f59e0b;--accent-blue:#3b82f6;--border:#2a3548}
+        *{margin:0;padding:0;box-sizing:border-box}
+        body{font-family:'Inter',sans-serif;background:var(--bg-primary);color:var(--text-primary);min-height:100vh;line-height:1.6}
+        nav{background:rgba(17,24,39,0.95);backdrop-filter:blur(20px);border-bottom:1px solid var(--border);position:sticky;top:0;z-index:1000}
+        .nav-container{max-width:1400px;margin:0 auto;padding:0 24px;display:flex;align-items:center;justify-content:space-between;height:64px}
+        .nav-brand{font-size:1.4rem;font-weight:800;background:linear-gradient(135deg,#10b981,#3b82f6);-webkit-background-clip:text;-webkit-text-fill-color:transparent;text-decoration:none}
+        .nav-links{display:flex;gap:4px;list-style:none}
+        .nav-links a{color:var(--text-secondary);text-decoration:none;padding:8px 16px;border-radius:8px;font-size:0.9rem;font-weight:500}
+        .nav-links a:hover,.nav-links a.active{background:var(--bg-card);color:var(--text-primary)}
+        main{max-width:1400px;margin:0 auto;padding:32px 24px}
+        .hero{text-align:center;padding:24px 0}
+        .hero h1{font-size:2rem;font-weight:900;background:linear-gradient(135deg,#10b981,#3b82f6,#8b5cf6);-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:8px}
+        .hero p{color:var(--text-secondary)}
+        .card{background:var(--bg-card);border:1px solid var(--border);border-radius:16px;padding:24px;margin-bottom:24px}
+        .card-title{font-size:1.15rem;font-weight:700;margin-bottom:16px;display:flex;align-items:center;gap:8px}
+        .live-dot{display:inline-block;width:10px;height:10px;background:#ef4444;border-radius:50%;margin-right:8px;animation:pulse 1.2s infinite}
+        @keyframes pulse{0%,100%{opacity:1}50%{opacity:0.5}}
+        .champion-box{text-align:center;padding:20px;background:linear-gradient(135deg,rgba(245,158,11,0.15),rgba(16,185,129,0.08));border:2px solid rgba(245,158,11,0.4);border-radius:16px;margin-bottom:20px}
+        .champion-name{font-size:2rem;font-weight:900;background:linear-gradient(135deg,#f59e0b,#fbbf24);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+        .live-card{background:var(--bg-secondary);border:1px solid var(--accent-yellow);border-radius:12px;padding:16px;margin-bottom:20px}
+        .live-card .teams{display:flex;justify-content:space-around;align-items:center;margin-bottom:12px}
+        .live-card .vs{font-size:0.9rem;color:var(--text-muted)}
+        .live-card .team-name{font-size:1.1rem;font-weight:700}
+        .prob-bar{display:flex;height:24px;border-radius:12px;overflow:hidden;background:var(--bg-primary);margin-top:8px}
+        .prob-seg{display:flex;align-items:center;justify-content:center;font-size:0.7rem;font-weight:700;color:white;transition:width 0.5s}
+        .status-bar{height:4px;background:var(--border);border-radius:2px;margin-top:12px;overflow:hidden}
+        .status-fill{height:100%;background:linear-gradient(90deg,#10b981,#3b82f6);transition:width 1s linear}
+        .bracket-container{display:flex;gap:10px;overflow-x:auto;padding:12px;background:rgba(10,14,26,0.5);border-radius:12px;justify-content:flex-start}
+        .bracket-col{display:flex;flex-direction:column;gap:6px;min-width:150px}
+        .bracket-match{background:var(--bg-secondary);border:1px solid var(--border);border-radius:8px;padding:6px 8px;font-size:0.78rem;transition:all 0.4s}
+        .bracket-match .team-row{display:flex;justify-content:space-between;padding:2px 0}
+        .bracket-match .team-row.winner{font-weight:700;color:var(--accent-green)}
+        .bracket-match .team-row.loser{color:var(--text-muted)}
+        .bracket-match .prob{font-size:0.65rem;color:var(--text-muted);text-align:center;margin-top:3px}
+        .bracket-stage-title{font-weight:700;font-size:0.7rem;color:var(--accent-blue);text-align:center;margin-bottom:6px;text-transform:uppercase}
+        .final-match{border-color:rgba(245,158,11,0.5)!important;background:rgba(245,158,11,0.12)!important}
+        .btn{display:inline-flex;align-items:center;gap:6px;padding:8px 16px;border-radius:10px;font-size:0.85rem;font-weight:600;border:none;cursor:pointer}
+        .btn-primary{background:linear-gradient(135deg,#3b82f6,#2563eb);color:white}
+        .btn-outline{background:transparent;border:1px solid var(--border);color:var(--text-secondary)}
+        table{width:100%;border-collapse:collapse;font-size:0.85rem}
+        th{text-align:left;padding:8px;font-size:0.7rem;text-transform:uppercase;color:var(--text-muted);border-bottom:1px solid var(--border)}
+        td{padding:8px;border-bottom:1px solid rgba(42,53,72,0.5)}
+        .text-green{color:var(--accent-green)}
+        .text-red{color:var(--accent-red)}
+        .text-blue{color:var(--accent-blue)}
+        .text-muted{color:var(--text-muted)}
+        .badge{display:inline-flex;align-items:center;padding:3px 8px;border-radius:12px;font-size:0.7rem;font-weight:600}
+        .badge-gold{background:rgba(245,158,11,0.2);color:#fbbf24}
+        .badge-green{background:rgba(16,185,129,0.2);color:#34d399}
+        .progress-bar{height:8px;background:var(--bg-secondary);border-radius:4px;overflow:hidden}
+        .progress-fill{height:100%;border-radius:4px;transition:width 0.3s}
+        #topPredictions{padding:8px 0}
+        .pred-row{display:flex;align-items:center;gap:10px;padding:6px 0}
+        .pred-row .num{width:24px;font-weight:700;color:var(--accent-blue)}
+        .pred-row .name{flex:1;font-weight:600}
+        .pred-row .bar{width:100px}
+        .pred-row .pct{width:70px;text-align:right;font-weight:700;color:var(--accent-green)}
+    </style>
+</head>
+<body>
+<nav>
+    <div class="nav-container">
+        <a href="/" class="nav-brand">⚽ WC2026 Predictor</a>
+        <ul class="nav-links">
+            <li><a href="/">🏠 Dashboard</a></li>
+            <li><a href="/" class="active">🔴 Live Predictions</a></li>
+            <li><a href="/predict">🔮 Predict</a></li>
+            <li><a href="/tournament">🏆 Tournament</a></li>
+            <li><a href="/players">👤 Players</a></li>
+        </ul>
+</div>
+</nav>
+
+<main>
+    <div class="hero">
+        <h1><span class="live-dot"></span>🔮 Live Prediction WC2026</h1>
+        <p>Prediksi <strong>real-time</strong> yang terus berubah setiap saat</p>
+        <p id="updateCounter" style="font-size:0.85rem;color:var(--accent-green);margin-top:8px;">Initializing...</p>
+    </div>
+
+    <!-- Champion -->
+    <div class="champion-box" id="championBox">
+        <div style="font-size:0.75rem;color:var(--text-muted);margin-bottom:8px;">🏆 PREDIKSI JUARA</div>
+        <div class="champion-name" id="championName">Loading...</div>
+        <div id="championProb" style="color:var(--text-secondary);font-size:0.9rem;margin-top:8px;"></div>
+    </div>
+
+    <!-- Currently Simulating -->
+    <div class="live-card">
+        <div style="font-size:0.7rem;color:var(--accent-yellow);margin-bottom:8px;text-transform:uppercase;">Currently Simulating</div>
+        <div class="teams">
+            <div style="text-align:center;flex:1">
+                <div class="team-name" id="liveHome">-</div>
+                <div style="font-size:0.7rem;color:var(--accent-green)" id="liveHomeProb">45%</div>
+            </div>
+            <div class="vs">VS</div>
+            <div style="text-align:center;flex:1">
+                <div class="team-name" id="liveAway">-</div>
+                <div style="font-size:0.7rem;color:var(--accent-red)" id="liveAwayProb">35%</div>
+            </div>
+        </div>
+        <div class="prob-bar">
+            <div class="prob-seg" id="segHome" style="background:var(--accent-green);width:45%">45%</div>
+            <div class="prob-seg" id="segDraw" style="background:var(--text-muted);width:20%">20%</div>
+            <div class="prob-seg" id="segAway" style="background:var(--accent-red);width:35%">35%</div>
+        </div>
+        <div style="display:flex;justify-content:space-between;font-size:0.7rem;color:var(--text-muted);margin-top:8px">
+            <span>xG: <strong id="liveXG1">1.2</strong> - <strong id="liveXG2">0.9</strong></span>
+            <span>BTTS: <strong id="liveBTTS">55%</strong> | O2.5: <strong id="liveOU25">48%</strong></span>
+        </div>
+    </div>
+
+    <div class="status-bar"><div class="status-fill" id="statusFill" style="width:0%"></div></div>
+
+    <!-- Bracket -->
+    <div class="card" style="margin-top:20px">
+        <div class="card-title">⚡ Bagan Fase Gugur — Live Updating</div>
+        <div class="bracket-container" id="bracketContainer">
+            <div style="padding:32px;color:var(--text-muted);text-align:center">Loading...</div>
+        </div>
+    </div>
+
+    <!-- Top Predictions -->
+    <div class="card">
+        <div class="card-title">📊 Top 10 Prediksi Juara</div>
+        <div id="topPredictions"></div>
+    </div>
+</main>
+
+<script>
+(function() {
+    "use strict";
+    
+    var TEAMS = ["Argentina","France","Spain","England","Brazil","Netherlands","Portugal","Belgium","Germany","Uruguay","Croatia","Switzerland","Morocco","Colombia","Japan","Austria","United States","Norway","Ecuador","Mexico","Czech Republic","South Korea","Sweden","Iran","Egypt","Australia","Ivory Coast","Scotland","Ghana","Canada","Paraguay","Cape Verde"];
+    
+    var ELO = {Argentina:2150,France:2120,Spain:2080,England:2060,Brazil:2050,Netherlands:2030,Portugal:2020,Belgium:2000,Germany:1980,Uruguay:1970,Croatia:1960,Switzerland:1930,Morocco:1920,Colombia:1910,Japan:1900,Austria:1890,USA:1880,Norway:1880,Ecuador:1870,Mexico:1860,CzechRepublic:1850,SouthKorea:1840,Sweden:1840,Iran:1830,Egypt:1830,Australia:1820,IvoryCoast:1820,Scotland:1820,Paraguay:1800,Ghana:1810,Nigeria:1840,Cameroon:1800,CostaRica:1790,Jamaica:1740,Tunisia:1800,Algeria:1820,Mali:1780,Panama:1760,Qatar:1770,SaudiArabia:1780,Iraq:1760,Jordan:1720,CapeVerde:1750,NewZealand:1720,Uzbekistan:1750,"DRCongo":1750,Bosnia:1780,Curacao:1650};
+    
+    var simCount = 0;
+    var championCounts = {};
+    var stageCounts = {};
+    TEAMS.forEach(function(t) { championCounts[t] = 0; stageCounts[t] = {r16:0,qf:0,sf:0,final:0}; });
+    
+    function getElo(t) { return ELO[t] || 1750; }
+    
+    function pickMatch() {
+        var i = Math.floor(Math.random() * TEAMS.length);
+        var j = Math.floor(Math.random() * TEAMS.length);
+        while (j === i) j = Math.floor(Math.random() * TEAMS.length);
+        var ea = getElo(TEAMS[i]), eb = getElo(TEAMS[j]);
+        var pa = ea / (ea + eb);
+        if (Math.random() < 0.15) {
+            if (ea > eb) pa *= (0.3 + Math.random() * 0.4);
+            else pa = 1 - (1 - pa) * (0.3 + Math.random() * 0.4);
+        }
+        pa = Math.max(0.05, Math.min(0.95, pa + (Math.random() - 0.5) * 0.15));
+        var homeWin = pa * 100;
+        var draw = (20 + (Math.random() - 0.5) * 6);
+        var awayWin = 100 - homeWin - draw;
+        if (awayWin < 5) { awayWin = 5; homeWin = 95 - draw; }
+        return {home:TEAMS[i], away:TEAMS[j], homeWin:homeWin, draw:draw, awayWin:awayWin, winner:Math.random()<pa?TEAMS[i]:TEAMS[j], xg1:Math.random()*2+0.5, xg2:Math.random()*1.8+0.3};
+    }
+    
+    function runBracket() {
+        var t32 = TEAMS.slice().sort(function(a,b){return getElo(b)-getElo(a);}).slice(0,32);
+        var r32=[], r16=[], qf=[], sf=[], f=[];
+        for (var i=0;i<16;i++){r32.push(pickMatch().winner);stageCounts[r32[i]].r16++;}
+        for (var i=0;i<8;i++){r16.push(pickMatch().winner);stageCounts[r16[i]].qf++;}
+        for (var i=0;i<4;i++){qf.push(pickMatch().winner);stageCounts[qf[i]].sf++;}
+        for (var i=0;i<2;i++){sf.push(pickMatch().winner);stageCounts[sf[i]].final++;}
+        championCounts[pickMatch().winner]++;
+        return {t32:t32,r32:r32,r16:r16,qf:qf,sf:sf};
+    }
+    
+    function renderBracket(b) {
+        var c = document.getElementById("bracketContainer");
+        var stages = [{l:"32 Besar",items:[]},{l:"16 Besar",items:[]},{l:"8 Besar",items:[]},{l:"Semi Final",items:[]},{l:"Final",items:[]}];
+        for (var i=0;i<16;i++) stages[0].items.push({h:b.t32[i],a:b.t32[31-i],w:b.r32[i]});
+        for (var i=0;i<8;i++) stages[1].items.push({h:b.r32[i*2],a:b.r32[i*2+1],w:b.r16[i]});
+        for (var i=0;i<4;i++) stages[2].items.push({h:b.r16[i*2],a:b.r16[i*2+1],w:b.qf[i]});
+        for (var i=0;i<2;i++) stages[3].items.push({h:b.qf[i*2],a:b.qf[i*2+1],w:b.sf[i]});
+        stages[4].items.push({h:b.sf[0],a:b.sf[1],w:b.r32[0]});
+        
+        var ph = ["0px","15px","30px","60px","90px"];
+        var html = "";
+        stages.forEach(function(s, idx) {
+            html += '<div class="bracket-col" style="padding-top:'+ph[idx]+'">';
+            html += '<div class="bracket-stage-title">'+s.l+'</div>';
+            s.items.forEach(function(m) {
+                var isFinal = idx === 4;
+                html += '<div class="bracket-match'+(isFinal?' final-match':'')+'">';
+                html += '<div class="team-row '+((m.w===m.h)?'winner':'loser')+'"><span>'+m.h+'</span></div>';
+                html += '<div class="team-row '+((m.w===m.a)?'winner':'loser')+'"><span>'+m.a+'</span></div>';
+                if (!isFinal) html += '<div class="prob">→ '+m.w+'</div>';
+                else html += '<div class="prob" style="color:var(--accent-green);font-weight:700">🏆 '+m.w+'</div>';
+                html += '</div>';
+            });
+            html += '</div>';
+        });
+        c.innerHTML = html;
+    }
+    
+    function renderTop() {
+        var total = simCount;
+        var sorted = Object.entries(championCounts).sort(function(a,b){return b[1]-a[1];}).slice(0,10);
+        var html = "";
+        sorted.forEach(function(item, i) {
+            var pct = total > 0 ? (item[1]/total*100).toFixed(1) : "0.0";
+            html += '<div class="pred-row"><span class="num">'+(i+1)+'</span><span class="name">'+item[0]+'</span>';
+            html += '<div class="bar"><div class="progress-fill progress-green" style="width:'+Math.min(100,pct*2)+'%"></div></div>';
+            html += '<span class="pct">'+pct+'%</span></div>';
+        });
+        document.getElementById("topPredictions").innerHTML = html;
+    }
+    
+    function updateChampion() {
+        if (simCount === 0) return;
+        var sorted = Object.entries(championCounts).sort(function(a,b){return b[1]-a[1];});
+        var top = sorted[0];
+        var pct = (top[1]/simCount*100).toFixed(1);
+        document.getElementById("championName").textContent = "🏆 " + top[0];
+        document.getElementById("championProb").textContent = top[0] + " memimpin dengan " + pct + "%";
+    }
+    
+    function updateLive(pred) {
+        document.getElementById("liveHome").textContent = pred.home;
+        document.getElementById("liveAway").textContent = pred.away;
+        document.getElementById("liveHomeProb").textContent = pred.homeWin.toFixed(1)+"%";
+        document.getElementById("liveAwayProb").textContent = pred.awayWin.toFixed(1)+"%";
+        document.getElementById("segHome").textContent = pred.homeWin.toFixed(0)+"%";
+        document.getElementById("segAway").textContent = pred.awayWin.toFixed(0)+"%";
+        document.getElementById("segDraw").textContent = pred.draw.toFixed(0)+"%";
+        document.getElementById("segHome").style.width = pred.homeWin.toFixed(0)+"%";
+        document.getElementById("segDraw").style.width = pred.draw.toFixed(0)+"%";
+        document.getElementById("segAway").style.width = pred.awayWin.toFixed(0)+"%";
+        document.getElementById("liveXG1").textContent = pred.xg1.toFixed(1);
+        document.getElementById("liveXG2").textContent = pred.xg2.toFixed(1);
+        document.getElementById("liveBTTS").textContent = (40+Math.floor(Math.random()*30))+"%";
+        document.getElementById("liveOU25").textContent = (35+Math.floor(Math.random()*30))+"%";
+    }
+    
+    // Initial bracket
+    var initial = runBracket();
+    renderBracket(initial);
+    renderTop();
+    updateChampion();
+    
+    // Live loop - every second
+    setInterval(function() {
+        var match = pickMatch();
+        updateLive(match);
+        
+        // Every 5 simulations, recompute bracket
+        if (simCount % 5 === 0) {
+            var b = runBracket();
+            renderBracket(b);
+            renderTop();
+            updateChampion();
+        }
+        
+        simCount++;
+        document.getElementById("updateCounter").textContent = "Simulation #" + simCount + " | " + new Date().toLocaleTimeString();
+        
+        var pct = (simCount % 30) / 30 * 100;
+        document.getElementById("statusFill").style.width = (100-pct) + "%";
+    }, 1000);
+})();
+</script>
+</body>
+</html>
