@@ -2,7 +2,7 @@
 World Cup Predictor - Flask Web Application
 Data source: FIFA.com live qualification standings (June 2026)
 """
-import json, os, sys
+import json, os, sys, random
 from datetime import datetime
 from flask import Flask, render_template, request, jsonify, redirect, url_for
 
@@ -159,8 +159,7 @@ def api_odds():
 
 @app.route("/live-predictions")
 def live_predictions():
-    """Live predictions based on current FIFA standings."""
-    # Load live standings
+    """Live predictions based on current FIFA standings — includes knockout bracket."""
     live_data = load_live_data()
     if not live_data:
         live_data = generate_sample_data()
@@ -169,11 +168,8 @@ def live_predictions():
     # Generate predictions for each group
     group_predictions = []
     for gname, teams in live_data.get("groups", {}).items():
-        # Find teams not yet qualified or eliminated
         active_teams = [t for t in teams if t.get("status") not in ["qualified", "eliminated"]]
-        
         if len(active_teams) >= 2:
-            # Generate match predictions between active teams
             matches = []
             for i in range(len(active_teams)):
                 for j in range(i + 1, len(active_teams)):
@@ -181,8 +177,7 @@ def live_predictions():
                     t2 = active_teams[j]
                     pred = predictor.predict_match(t1["team"], t2["team"])
                     matches.append({
-                        "home": t1["team"],
-                        "away": t2["team"],
+                        "home": t1["team"], "away": t2["team"],
                         "prediction": pred["prediction"],
                         "expected_goals": pred["expected_goals"],
                         "btts": pred["btts"],
@@ -191,22 +186,224 @@ def live_predictions():
                         "home_elo": TeamStrengthAnalyzer.get_team(t1["team"]).get("elo", 1500),
                         "away_elo": TeamStrengthAnalyzer.get_team(t2["team"]).get("elo", 1500),
                     })
-            
-            group_predictions.append({
-                "group": gname,
-                "matches": matches,
-                "teams": teams,
-            })
+            group_predictions.append({"group": gname, "matches": matches, "teams": teams})
     
     # Generate qualification predictions
     qualification_preds = generate_qualification_predictions(live_data)
+    
+    # Run knockout simulation based on current standings
+    knockout_sim = run_knockout_simulation(live_data)
     
     return render_template("live_predictions.html", 
         live_data=live_data,
         group_predictions=group_predictions,
         qualification_preds=qualification_preds,
+        knockout_sim=knockout_sim,
         now=datetime.now().strftime("%B %d, %Y %H:%M UTC")
     )
+
+
+def run_knockout_simulation(live_data):
+    """
+    Run knockout simulation based on current standings.
+    Teams already qualified get their position, others are predicted.
+    """
+    # Get current group standings
+    group_winners = []
+    group_runners = []
+    third_place = []
+    
+    for gname, teams in live_data.get("groups", {}).items():
+        for t in teams:
+            if t.get("status") == "qualified":
+                if t["pos"] == 1:
+                    group_winners.append(t["team"])
+                elif t["pos"] == 2:
+                    group_runners.append(t["team"])
+                elif t["pos"] == 3:
+                    third_place.append(t["team"])
+            else:
+                # Not yet decided — use current position as prediction
+                if t["pos"] == 1:
+                    group_winners.append(t["team"])
+                elif t["pos"] == 2:
+                    group_runners.append(t["team"])
+                elif t["pos"] == 3:
+                    third_place.append({"team": t["team"], "pts": t["pts"], "gd": t["gd"], "gf": t.get("gf", 0)})
+    
+    # Sort 3rd place by points, GD, GF
+    third_place.sort(key=lambda x: (-x.get("pts", 0), -x.get("gd", 0), -x.get("gf", 0)))
+    best_third = [t["team"] if isinstance(t, dict) else t for t in third_place[:8]]
+    
+    # Combine into 32 teams
+    known = ["Germany", "Argentina", "Mexico", "United States"]
+    seeded = []
+    for t in known:
+        if t not in seeded: seeded.append(t)
+    for t in group_winners:
+        if t not in seeded: seeded.append(t)
+    for t in group_runners:
+        if t not in seeded: seeded.append(t)
+    for t in best_third:
+        if t not in seeded: seeded.append(t)
+    
+    qualified_32 = seeded[:32]
+    
+    # Sort by Elo
+    def get_elo(t):
+        d = TeamStrengthAnalyzer.get_team(t)
+        return d.get("elo", 1500) if d else 1500
+    qualified_32.sort(key=get_elo, reverse=True)
+    
+    # Run knockout bracket (30 simulations for speed)
+    n_sims = 30
+    stage_counts = {t: {"r32": 0, "r16": 0, "qf": 0, "sf": 0, "final": 0, "winner": 0} for t in qualified_32}
+
+    def sim_match(a, b):
+        """Helper to simulate a knockout match (fast version)."""
+        d_a = TeamStrengthAnalyzer.get_team(a)
+        d_b = TeamStrengthAnalyzer.get_team(b)
+        elo_a = d_a.get("elo", 1500) if d_a else 1500
+        elo_b = d_b.get("elo", 1500) if d_b else 1500
+        # Simplified probability based on Elo
+        prob_a = elo_a / (elo_a + elo_b)
+        # Apply luck
+        if random.random() < 0.15:
+            if elo_a > elo_b:
+                prob_a *= random.uniform(0.3, 0.7)
+            else:
+                prob_a = 1 - (1 - prob_a) * random.uniform(0.3, 0.7)
+        prob_a = max(0.05, min(0.95, prob_a))
+        return a if random.random() < prob_a else b
+    
+    for _ in range(n_sims):
+        # R32
+        r32_w = []
+        for i in range(16):
+            a, b = qualified_32[i], qualified_32[31 - i]
+            w = sim_match(a, b)
+            r32_w.append(w)
+            stage_counts[w]["r32"] += 1
+        
+        # R16
+        r16_w = []
+        for i in range(0, 16, 2):
+            w = sim_match(r32_w[i], r32_w[i+1])
+            r16_w.append(w)
+            stage_counts[w]["r16"] += 1
+        
+        # QF
+        qf_w = []
+        for i in range(0, 8, 2):
+            w = sim_match(r16_w[i], r16_w[i+1])
+            qf_w.append(w)
+            stage_counts[w]["qf"] += 1
+        
+        # SF
+        sf_w = []
+        for i in range(0, 4, 2):
+            w = sim_match(qf_w[i], qf_w[i+1])
+            sf_w.append(w)
+            stage_counts[w]["sf"] += 1
+        
+        # Final
+        champion = sim_match(sf_w[0], sf_w[1])
+        runner_up = sf_w[1] if champion == sf_w[0] else sf_w[0]
+        stage_counts[champion]["final"] += 1
+        stage_counts[runner_up]["final"] += 1
+        stage_counts[champion]["winner"] += 1
+    
+    # Build bracket display data (using most likely outcomes)
+    r32_matchups = []
+    for i in range(16):
+        a, b = qualified_32[i], qualified_32[31 - i]
+        pa = get_elo(a)
+        pb = get_elo(b)
+        prob_a = pa / (pa + pb)
+        r32_matchups.append({
+            "home": a, "away": b,
+            "home_elo": pa, "away_elo": pb,
+            "home_prob": round(prob_a * 100, 1),
+            "predicted_winner": a if prob_a > 0.5 else b,
+        })
+    
+    # Build R16 matchups (based on R32 winners)
+    r16_matchups = []
+    for i in range(0, 16, 2):
+        m1 = r32_matchups[i]
+        m2 = r32_matchups[i+1]
+        w1 = m1["predicted_winner"]
+        w2 = m2["predicted_winner"]
+        pa = get_elo(w1)
+        pb = get_elo(w2)
+        prob_a = pa / (pa + pb)
+        r16_matchups.append({
+            "home": w1, "away": w2,
+            "home_prob": round(prob_a * 100, 1),
+            "predicted_winner": w1 if prob_a > 0.5 else w2,
+        })
+    
+    # Build QF matchups
+    qf_matchups = []
+    for i in range(0, 8, 2):
+        w1 = r16_matchups[i]["predicted_winner"]
+        w2 = r16_matchups[i+1]["predicted_winner"]
+        pa = get_elo(w1)
+        pb = get_elo(w2)
+        prob_a = pa / (pa + pb)
+        qf_matchups.append({
+            "home": w1, "away": w2,
+            "home_prob": round(prob_a * 100, 1),
+            "predicted_winner": w1 if prob_a > 0.5 else w2,
+        })
+    
+    # Build SF matchups
+    sf_matchups = []
+    for i in range(0, 4, 2):
+        w1 = qf_matchups[i]["predicted_winner"]
+        w2 = qf_matchups[i+1]["predicted_winner"]
+        pa = get_elo(w1)
+        pb = get_elo(w2)
+        prob_a = pa / (pa + pb)
+        sf_matchups.append({
+            "home": w1, "away": w2,
+            "home_prob": round(prob_a * 100, 1),
+            "predicted_winner": w1 if prob_a > 0.5 else w2,
+        })
+    
+    # Final
+    final_home = sf_matchups[0]["predicted_winner"]
+    final_away = sf_matchups[1]["predicted_winner"]
+    pa = get_elo(final_home)
+    pb = get_elo(final_away)
+    prob_a = pa / (pa + pb)
+    predicted_champion = final_home if prob_a > 0.5 else final_away
+    
+    # Build probability table
+    prob_table = []
+    for t in qualified_32:
+        c = stage_counts[t]
+        prob_table.append({
+            "team": t,
+            "r32": 100.0,  # All 32 teams play R32
+            "r16": round(c["r16"] / n_sims * 100, 1),
+            "qf": round(c["qf"] / n_sims * 100, 1),
+            "sf": round(c["sf"] / n_sims * 100, 1),
+            "final": round(c["final"] / n_sims * 100, 1),
+            "winner": round(c["winner"] / n_sims * 100, 1),
+        })
+    prob_table.sort(key=lambda x: -x["winner"])
+    
+    return {
+        "qualified_32": qualified_32,
+        "r32_matchups": r32_matchups,
+        "r16_matchups": r16_matchups,
+        "qf_matchups": qf_matchups,
+        "sf_matchups": sf_matchups,
+        "final": {"home": final_home, "away": final_away, "home_prob": round(prob_a * 100, 1), "predicted_winner": predicted_champion},
+        "prob_table": prob_table,
+        "n_sims": n_sims,
+    }
 
 
 def generate_qualification_predictions(live_data):
