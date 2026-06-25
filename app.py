@@ -157,6 +157,121 @@ def api_odds():
     return jsonify({"odds": odds, "probabilities": probs})
 
 
+@app.route("/live-predictions")
+def live_predictions():
+    """Live predictions based on current FIFA standings."""
+    # Load live standings
+    live_data = load_live_data()
+    if not live_data:
+        live_data = generate_sample_data()
+        save_live_data(live_data)
+    
+    # Generate predictions for each group
+    group_predictions = []
+    for gname, teams in live_data.get("groups", {}).items():
+        # Find teams not yet qualified or eliminated
+        active_teams = [t for t in teams if t.get("status") not in ["qualified", "eliminated"]]
+        
+        if len(active_teams) >= 2:
+            # Generate match predictions between active teams
+            matches = []
+            for i in range(len(active_teams)):
+                for j in range(i + 1, len(active_teams)):
+                    t1 = active_teams[i]
+                    t2 = active_teams[j]
+                    pred = predictor.predict_match(t1["team"], t2["team"])
+                    matches.append({
+                        "home": t1["team"],
+                        "away": t2["team"],
+                        "prediction": pred["prediction"],
+                        "expected_goals": pred["expected_goals"],
+                        "btts": pred["btts"],
+                        "over_under_25": pred["over_under_25"],
+                        "most_likely_scores": pred["most_likely_scores"][:3],
+                        "home_elo": TeamStrengthAnalyzer.get_team(t1["team"]).get("elo", 1500),
+                        "away_elo": TeamStrengthAnalyzer.get_team(t2["team"]).get("elo", 1500),
+                    })
+            
+            group_predictions.append({
+                "group": gname,
+                "matches": matches,
+                "teams": teams,
+            })
+    
+    # Generate qualification predictions
+    qualification_preds = generate_qualification_predictions(live_data)
+    
+    return render_template("live_predictions.html", 
+        live_data=live_data,
+        group_predictions=group_predictions,
+        qualification_preds=qualification_preds,
+        now=datetime.now().strftime("%B %d, %Y %H:%M UTC")
+    )
+
+
+def generate_qualification_predictions(live_data):
+    """Generate qualification probability for each team based on current standings."""
+    predictions = []
+    
+    for gname, teams in live_data.get("groups", {}).items():
+        group_teams = []
+        for t in teams:
+            team_data = TeamStrengthAnalyzer.get_team(t["team"])
+            elo = team_data.get("elo", 1500) if team_data else 1500
+            
+            # Calculate qualification probability based on position and points
+            pos = t["pos"]
+            pts = t["pts"]
+            gd = t["gd"]
+            status = t.get("status", "")
+            
+            if status == "qualified":
+                qual_prob = 100.0
+            elif status == "eliminated":
+                qual_prob = 0.0
+            elif pos <= 2:
+                # Position 1-2: high chance
+                base_prob = 85 - (pos - 1) * 15
+                pts_bonus = min(15, pts * 2)
+                qual_prob = min(99, base_prob + pts_bonus)
+            elif pos == 3:
+                # Position 3: depends on points ranking among all 3rd places
+                base_prob = 35
+                pts_bonus = min(25, pts * 3)
+                qual_prob = min(75, base_prob + pts_bonus)
+            else:
+                # Position 4: eliminated unless many teams still have 0 matches
+                played = t.get("p", 0)
+                if played == 0:
+                    qual_prob = 15
+                elif played <= 2:
+                    qual_prob = 5
+                else:
+                    qual_prob = 0
+            
+            group_teams.append({
+                "team": t["team"],
+                "pos": pos,
+                "pts": pts,
+                "gd": gd,
+                "gf": t.get("gf", 0),
+                "ga": t.get("ga", 0),
+                "p": t.get("p", 0),
+                "w": t.get("w", 0),
+                "d": t.get("d", 0),
+                "l": t.get("l", 0),
+                "elo": elo,
+                "qual_prob": round(qual_prob, 1),
+                "status": status,
+            })
+        
+        # Sort by qualification probability
+        group_teams.sort(key=lambda x: (-x["qual_prob"], -x["pts"], -x["gd"]))
+        predictions.append({"group": gname, "teams": group_teams})
+    
+    return predictions
+
+
 @app.route("/api/groups")
 def api_groups():
     return jsonify({"groups": WC2026_QUAL_GROUPS, "groups_id": WC2026_QUAL_GROUPS_ID})

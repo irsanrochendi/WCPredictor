@@ -519,6 +519,7 @@
             <a href="/" class="nav-brand">⚽ WC2026 Predictor</a>
             <ul class="nav-links">
                 <li><a href="/" class="{% if request.path == '/' %}active{% endif %}">🏠 Dashboard</a></li>
+                <li><a href="/live-predictions" class="{% if request.path == '/live-predictions' %}active{% endif %}">🔴 Live Predictions</a></li>
                 <li><a href="/predict" class="{% if request.path == '/predict' %}active{% endif %}">🔮 Predict</a></li>
                 <li><a href="/tournament" class="{% if request.path == '/tournament' %}active{% endif %}">🏆 Tournament</a></li>
                 <li><a href="/players" class="{% if request.path == '/players' %}active{% endif %}">👤 Players</a></li>
