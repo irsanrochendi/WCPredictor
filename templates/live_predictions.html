@@ -1,284 +1,302 @@
 {% extends "base.html" %}
 
-{% block title %}Prediksi Live - WC2026{% endblock %}
+{% block title %}Live Prediction - WC2026{% endblock %}
 
 {% block extra_css %}
-.bracket-col { display: flex; flex-direction: column; gap: 8px; min-width: 170px; }
-.bracket-match { background: var(--bg-secondary); border: 1px solid var(--border); border-radius: 8px; padding: 8px 10px; font-size: 0.8rem; }
-.bracket-match.winner { border-color: var(--accent-green); background: rgba(16,185,129,0.12); }
+<style>
+.bracket-col { display: flex; flex-direction: column; gap: 8px; min-width: 160px; }
+.bracket-match { background: var(--bg-secondary); border: 1px solid var(--border); border-radius: 8px; padding: 8px 10px; font-size: 0.8rem; transition: all 0.3s; }
+.bracket-match:hover { border-color: var(--accent-blue); }
 .bracket-match .team-row { display: flex; justify-content: space-between; align-items: center; padding: 3px 0; }
 .bracket-match .team-row.winner { font-weight: 700; color: var(--accent-green); }
 .bracket-match .team-row.loser { color: var(--text-muted); }
 .bracket-match .prob { font-size: 0.7rem; color: var(--text-muted); text-align: center; margin-top: 4px; }
 .bracket-stage-title { font-weight: 700; font-size: 0.75rem; color: var(--accent-blue); text-align: center; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.05em; }
-.bracket-container { display: flex; gap: 16px; overflow-x: auto; padding: 16px 0; justify-content: flex-start; }
+.bracket-container { display: flex; gap: 12px; overflow-x: auto; padding: 12px 0; justify-content: flex-start; }
+.pulse { animation: pulse 2s infinite; }
+@keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.6; } }
+.live-indicator { display: inline-block; width: 8px; height: 8px; background: #ef4444; border-radius: 50%; margin-right: 6px; animation: pulse 1.5s infinite; }
+.typing-cursor::after { content: '|'; animation: blink 0.7s infinite; }
+@keyframes blink { 0%,100% { opacity: 0; } 50% { opacity: 1; } }
+</style>
 {% endblock %}
 
 {% block content %}
 <div class="hero">
-    <h1>🔮 Prediksi Live Kualifikasi WC2026</h1>
-    <p>Prediksi fase grup hingga final — berdasarkan data terbaru dari FIFA.com</p>
-    <p style="font-size: 0.85rem; color: var(--text-muted);">🕐 Last updated: {{ now }}</p>
+    <h1><span class="live-indicator"></span>🔮 Live Prediction WC2026</h1>
+    <p>Prediksi real-time yang <strong>terus update setiap saat</strong> berdasarkan data FIFA.com</p>
+    <p id="updateCounter" style="font-size: 0.85rem; color: var(--accent-green); margin-top: 8px;">Loading predictions...</p>
 </div>
 
-<!-- Auto Refresh -->
-<div style="text-align: center; margin-bottom: 24px;">
-    <button onclick="location.reload()" class="btn btn-outline" style="padding: 8px 20px; font-size: 0.85rem;">
-        🔄 Refresh Data
-    </button>
-    <button onclick="runSimulation()" class="btn btn-primary" style="padding: 8px 20px; font-size: 0.85rem; margin-left: 8px;">
-        ⚡ Jalankan Simulasi
-    </button>
-    <div id="simStatus" style="color: var(--text-muted); font-size: 0.75rem; margin-top: 4px; display: none;">
-        Running simulation...
+<!-- Update Timer -->
+<div style="text-align: center; margin-bottom: 20px; padding: 12px; background: var(--bg-card); border-radius: 10px; border: 1px solid var(--border);">
+    <div style="display: flex; justify-content: center; align-items: center; gap: 16px; flex-wrap: wrap;">
+        <span id="statusText" style="font-size: 0.85rem; color: var(--accent-green);">✅ Connected — Auto-updating</span>
+        <span id="timerDisplay" style="font-size: 0.8rem; color: var(--text-muted); font-family: monospace;"></span>
+        <button onclick="forceUpdate()" class="btn btn-primary" style="padding: 6px 16px; font-size: 0.8rem;">⚡ Force Update</button>
+    </div>
+    <div id="progressBar" style="height: 3px; background: var(--border); margin-top: 10px; border-radius: 2px; overflow: hidden;">
+        <div id="progressFill" style="height: 100%; background: linear-gradient(90deg, #10b981, #3b82f6); width: 0%; transition: width 0.3s;"></div>
     </div>
 </div>
 
-<!-- Champion Prediction -->
-{% if knockout_sim and knockout_sim.final %}
-<div class="card" style="text-align: center; background: linear-gradient(135deg, rgba(245,158,11,0.12), rgba(16,185,129,0.05)); border-color: rgba(245,158,11,0.3);">
-    <div class="card-title" style="justify-content: center;">🏆 Prediksi Juara Berdasarkan Data Live</div>
-    <div style="font-size: 1.4rem; margin: 16px 0;">
-        <span style="font-weight: 800;">{{ knockout_sim.final.home }}</span>
-        <span style="color: var(--text-muted); padding: 0 16px;">vs</span>
-        <span style="font-weight: 800;">{{ knockout_sim.final.away }}</span>
+<!-- Champion Card -->
+<div class="card" id="championCard" style="text-align: center; background: linear-gradient(135deg, rgba(245,158,11,0.12), rgba(16,185,129,0.05)); border-color: rgba(245,158,11,0.3);">
+    <div class="card-title" style="justify-content: center;">🏆 Prediksi Juara</div>
+    <div style="font-size: 1.5rem; margin: 12px 0;" id="finalDisplay">
+        <span id="finalHome" style="font-weight: 800;">-</span>
+        <span style="color: var(--text-muted); padding: 0 12px;">vs</span>
+        <span id="finalAway" style="font-weight: 800;">-</span>
     </div>
-    <div style="font-size: 2rem; font-weight: 900; background: linear-gradient(135deg, #f59e0b, #fbbf24); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">
-        🏆 {{ knockout_sim.final.predicted_winner }}
+    <div id="championDisplay" style="font-size: 1.8rem; font-weight: 900; background: linear-gradient(135deg, #f59e0b, #bbf7d0); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin: 8px 0;">
+        🏆 Loading...
     </div>
-    <p style="color: var(--text-secondary); margin-top: 8px;">
-        Berdasarkan {{ knockout_sim.n_sims }} simulasi dengan data terkini
-    </p>
+    <p id="championProb" style="color: var(--text-secondary); font-size: 0.85rem;"></p>
 </div>
-{% endif %}
 
-<!-- Knockout Bracket -->
-{% if knockout_sim %}
+<!-- 30 Second Progress Cycle -->
+<div class="card" style="border-color: rgba(245,158,11,0.2);">
+    <div class="card-title">📊 Live Cycle Progress</div>
+    <div class="grid-4" style="margin-bottom: 16px;">
+        <div class="stat-card">
+            <div id="cycleHome" style="font-size: 0.85rem; color: var(--text-muted);">Home</div>
+        </div>
+        <div class="stat-card">
+            <div id="cycleAway" style="font-size: 0.85rem; color: var(--text-muted);">Away</div>
+        </div>
+        <div class="stat-card">
+            <div id="cycleDraw" style="font-size: 0.85rem; color: var(--text-muted);">Draw</div>
+        </div>
+        <div class="stat-card">
+            <div style="font-size: 1.5rem; font-weight: 800; background: linear-gradient(135deg, #10b981, #3b82f6); -webkit-background-clip: text; -webkit-text-fill-color: transparent;" id="cyclePercent">0%</div>
+        </div>
+    </div>
+    <div style="font-size: 0.85rem; color: var(--text-secondary);">
+        Setiap 30 detik, sistem memilih pertandingan acak dan menghitung prediksi real-time
+    </div>
+</div>
+
+<!-- Bracket Section -->
 <div class="card">
-    <div class="card-title">📊 Bagan Fase Gugur (Prediksi dari Data Live)</div>
-    <div class="bracket-container">
-        <!-- R32 -->
-        <div class="bracket-col">
-            <div class="bracket-stage-title">32 Besar</div>
-            {% for m in knockout_sim.r32_matchups %}
-            <div class="bracket-match">
-                <div class="team-row {% if m.predicted_winner == m.home %}winner{% else %}loser{% endif %}">
-                    <span>{{ m.home }}</span>
-                    <span style="font-size:0.7rem;">{{ m.home_elo }}</span>
-                </div>
-                <div class="team-row {% if m.predicted_winner == m.away %}winner{% else %}loser{% endif %}">
-                    <span>{{ m.away }}</span>
-                    <span style="font-size:0.7rem;">{{ m.away_elo }}</span>
-                </div>
-                <div class="prob">Prediksi: {{ m.predicted_winner }} ({{ m.home_prob }}%)</div>
-            </div>
-            {% endfor %}
-        </div>
-        
-        <!-- R16 -->
-        <div class="bracket-col" style="padding-top: 20px;">
-            <div class="bracket-stage-title">16 Besar</div>
-            {% for m in knockout_sim.r16_matchups %}
-            <div class="bracket-match">
-                <div class="team-row {% if m.predicted_winner == m.home %}winner{% else %}loser{% endif %}">
-                    <span>{{ m.home }}</span>
-                </div>
-                <div class="team-row {% if m.predicted_winner == m.away %}winner{% else %}loser{% endif %}">
-                    <span>{{ m.away }}</span>
-                </div>
-                <div class="prob">→ {{ m.predicted_winner }}</div>
-            </div>
-            {% endfor %}
-        </div>
-        
-        <!-- QF -->
-        <div class="bracket-col" style="padding-top: 40px;">
-            <div class="bracket-stage-title">8 Besar</div>
-            {% for m in knockout_sim.qf_matchups %}
-            <div class="bracket-match">
-                <div class="team-row {% if m.predicted_winner == m.home %}winner{% else %}loser{% endif %}">
-                    <span>{{ m.home }}</span>
-                </div>
-                <div class="team-row {% if m.predicted_winner == m.away %}winner{% else %}loser{% endif %}">
-                    <span>{{ m.away }}</span>
-                </div>
-                <div class="prob">→ {{ m.predicted_winner }}</div>
-            </div>
-            {% endfor %}
-        </div>
-        
-        <!-- SF -->
-        <div class="bracket-col" style="padding-top: 80px;">
-            <div class="bracket-stage-title">Semi Final</div>
-            {% for m in knockout_sim.sf_matchups %}
-            <div class="bracket-match">
-                <div class="team-row {% if m.predicted_winner == m.home %}winner{% else %}loser{% endif %}">
-                    <span>{{ m.home }}</span>
-                </div>
-                <div class="team-row {% if m.predicted_winner == m.away %}winner{% else %}loser{% endif %}">
-                    <span>{{ m.away }}</span>
-                </div>
-                <div class="prob">→ {{ m.predicted_winner }}</div>
-            </div>
-            {% endfor %}
-        </div>
-        
-        <!-- Final -->
-        <div class="bracket-col" style="padding-top: 120px;">
-            <div class="bracket-stage-title">🏆 Final</div>
-            {% if knockout_sim.final %}
-            <div class="bracket-match winner" style="border-color: rgba(245,158,11,0.5); background: rgba(245,158,11,0.12);">
-                <div class="team-row {% if knockout_sim.final.predicted_winner == knockout_sim.final.home %}winner{% else %}loser{% endif %}">
-                    <span style="font-size:1rem;">{{ knockout_sim.final.home }}</span>
-                    <span style="font-size:0.7rem;">({{ knockout_sim.final.home_prob }}%)</span>
-                </div>
-                <div style="text-align:center; color:var(--text-muted); font-size:0.7rem; padding: 2px 0;">vs</div>
-                <div class="team-row {% if knockout_sim.final.predicted_winner == knockout_sim.final.away %}winner{% else %}loser{% endif %}">
-                    <span style="font-size:1rem;">{{ knockout_sim.final.away }}</span>
-                    <span style="font-size:0.7rem;">({{ 100 - knockout_sim.final.home_prob }}%)</span>
-                </div>
-                <div class="prob" style="color:var(--accent-green); font-weight:700; margin-top:8px;">
-                    🏆 {{ knockout_sim.final.predicted_winner }}
-                </div>
-            </div>
-            {% endif %}
-        </div>
+    <div class="card-title">🔥 Bagan Fase Gugur — Live Updating</div>
+    <div id="bracketSection" class="bracket-container">
+        <div style="text-align: center; padding: 32px; color: var(--text-muted);">Loading bracket...</div>
     </div>
 </div>
-{% endif %}
-
-<!-- Probabilities Table -->
-{% if knockout_sim and knockout_sim.prob_table %}
-<div class="card">
-    <div class="card-title">📋 Tabel Probabilitas Fase Gugur ({{ knockout_sim.n_sims }} simulasi)</div>
-    <div style="overflow-x: auto;">
-        <table style="font-size: 0.82rem;">
-            <thead>
-                <tr>
-                    <th>#</th>
-                    <th>Tim</th>
-                    <th>32B</th>
-                    <th>16B</th>
-                    <th>8B</th>
-                    <th>SF</th>
-                    <th>Final</th>
-                    <th>🏆 Juara</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for t in knockout_sim.prob_table[:20] %}
-                <tr>
-                    <td><strong>{{ loop.index }}</strong></td>
-                    <td><a href="/team/{{ t.team }}" style="color:var(--text-primary);text-decoration:none;font-weight:500;">{{ t.team }}</a></td>
-                    <td>{{ t.r32 }}%</td>
-                    <td>{{ t.r16 }}%</td>
-                    <td>{{ t.qf }}%</td>
-                    <td>{{ t.sf }}%</td>
-                    <td style="color:var(--accent-blue);">{{ t.final }}%</td>
-                    <td><strong style="color:var(--accent-green);">{{ t.winner }}%</strong></td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-    </div>
-</div>
-{% endif %}
-
-<!-- Qualification Predictions per Group -->
-{% for gp in qualification_preds %}
-<div class="card">
-    <div class="card-title">{{ gp.group }} — Prediksi Kualifikasi</div>
-    <table style="font-size: 0.85rem;">
-        <thead>
-            <tr>
-                <th>#</th><th>Tim</th><th>P</th><th>W</th><th>D</th><th>L</th>
-                <th>GF</th><th>GA</th><th>GD</th><th>Pts</th><th>Elo</th>
-                <th>Peluang Lolos</th><th>Status</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for t in gp.teams %}
-            <tr style="{% if t.status == 'qualified' %}background:rgba(16,185,129,0.1);{% elif t.status == 'eliminated' %}background:rgba(239,68,68,0.05);{% endif %}">
-                <td><strong>{{ t.pos }}</strong></td>
-                <td><a href="/team/{{ t.team }}" style="color:var(--text-primary);text-decoration:none;font-weight:500;">{{ t.team }}</a></td>
-                <td>{{ t.p }}</td><td>{{ t.w }}</td><td>{{ t.d }}</td><td>{{ t.l }}</td>
-                <td>{{ t.gf }}</td><td>{{ t.ga }}</td>
-                <td style="color:{% if t.gd > 0 %}var(--accent-green){% elif t.gd < 0 %}var(--accent-red){% else %}var(--text-secondary){% endif %};">{{ t.gd }}</td>
-                <td><strong>{{ t.pts }}</strong></td><td>{{ t.elo }}</td>
-                <td>
-                    <div style="display:flex;align-items:center;gap:6px;">
-                        <div class="progress-bar" style="width:70px;">
-                            <div class="progress-fill {% if t.qual_prob >= 70 %}progress-green{% elif t.qual_prob >= 40 %}progress-blue{% elif t.qual_prob > 0 %}progress-yellow{% else %}progress-red{% endif %}" style="width:{{ t.qual_prob }}%;"></div>
-                        </div>
-                        <span style="font-size:0.75rem;font-weight:600;width:36px;">{{ t.qual_prob }}%</span>
-                    </div>
-                </td>
-                <td>
-                    {% if t.status == 'qualified' %}
-                    <span class="badge badge-gold">✅ Lolos</span>
-                    {% elif t.status == 'eliminated' %}
-                    <span class="badge badge-red">❌</span>
-                    {% else %}
-                    <span class="badge badge-blue">⏳</span>
-                    {% endif %}
-                </td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
-</div>
-{% endfor %}
-
-<!-- Match Predictions -->
-{% for gp in group_predictions %}
-{% if gp.matches %}
-<div class="card">
-    <div class="card-title">{{ gp.group }} — Prediksi Pertandingan</div>
-    <div class="grid-2">
-        {% for m in gp.matches[:4] %}
-        <div style="background: var(--bg-secondary); border-radius: 10px; padding: 14px; border: 1px solid var(--border);">
-            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
-                <div style="text-align:right;flex:1;">
-                    <div style="font-weight:600;">{{ m.home }}</div>
-                    <div style="font-size:0.7rem;color:var(--text-muted);">Elo: {{ m.home_elo }}</div>
-                </div>
-                <div style="padding:0 12px;font-weight:800;color:var(--text-muted);">VS</div>
-                <div style="text-align:left;flex:1;">
-                    <div style="font-weight:600;">{{ m.away }}</div>
-                    <div style="font-size:0.7rem;color:var(--text-muted);">Elo: {{ m.away_elo }}</div>
-                </div>
-            </div>
-            <div style="display:flex;gap:4px;margin-bottom:6px;">
-                <div style="flex:1;text-align:center;padding:5px;background:rgba(16,185,129,0.15);border-radius:4px;">
-                    <div style="font-size:0.65rem;color:var(--text-muted);">Home</div>
-                    <div style="font-weight:700;color:var(--accent-green);font-size:0.9rem;">{{ m.prediction.home_win }}%</div>
-                </div>
-                <div style="flex:1;text-align:center;padding:5px;background:rgba(100,116,139,0.15);border-radius:4px;">
-                    <div style="font-size:0.65rem;color:var(--text-muted);">Draw</div>
-                    <div style="font-weight:700;font-size:0.9rem;">{{ m.prediction.draw }}%</div>
-                </div>
-                <div style="flex:1;text-align:center;padding:5px;background:rgba(239,68,68,0.15);border-radius:4px;">
-                    <div style="font-size:0.65rem;color:var(--text-muted);">Away</div>
-                    <div style="font-weight:700;color:var(--accent-red);font-size:0.9rem;">{{ m.prediction.away_win }}%</div>
-                </div>
-            </div>
-            <div style="font-size:0.7rem;color:var(--text-muted);border-top:1px solid rgba(42,53,72,0.3);padding-top:5px;">
-                xG: {{ m.expected_goals.home }}-{{ m.expected_goals.away }} | BTTS: {{ m.btts }}% | O2.5: {{ m.over_under_25.over }}%
-            </div>
-        </div>
-        {% endfor %}
-    </div>
-</div>
-{% endif %}
-{% endfor %}
 
 <script>
-function runSimulation() {
-    // In a real app, this would call the backend to trigger a full simulation
-    location.reload();
+// ========== LIVE PREDICTION ENGINE ==========
+const UPDATE_INTERVAL = 30000; // 30 seconds per cycle
+let currentMatchIndex = 0;
+let totalUpdates = 0;
+
+// All teams from server-rendered data
+const ALL_TEAMS = {{ knockout_sim.qualified_32|tojson if knockout_sim and knockout_sim.qualified_32 else [] }};
+const BRACKET_DATA = {{ knockout_sim|tojson if knockout_sim else {} }};
+const FINAL_DATA = BRACKET_DATA.final || {};
+
+// Initialize immediately
+(function() {
+    try {
+        if (BRACKET_DATA && BRACKET_DATA.r32_matchups) {
+            updateBracketDisplay(BRACKET_DATA);
+        }
+        updateChampionDisplay(FINAL_DATA);
+    } catch(e) {
+        console.log('Init error:', e);
+    }
+    
+    startSimulationLoop();
+    
+    setInterval(() => {
+        fetch('/api/live-predictions')
+            .then(r => r.json())
+            .then(data => {
+                if (data && data.r32_matchups) {
+                    updateBracketDisplay(data);
+                    updateChampionDisplay(data.final || {});
+                }
+                totalUpdates++;
+                document.getElementById('updateCounter').textContent = 'Updates: ' + totalUpdates + ' | ' + new Date().toLocaleTimeString();
+            }).catch(() => {});
+    }, 30000);
+    
+    let progress = 0;
+    setInterval(() => { progress += 2; if (progress > 100) progress = 0; document.getElementById('progressFill').style.width = progress + '%'; }, 1000);
+})();
+
+function simulateNextMatch() {
+    if (ALL_TEAMS.length < 2) return;
+    
+    // Pick two random teams
+    const idx1 = Math.floor(Math.random() * ALL_TEAMS.length);
+    let idx2 = Math.floor(Math.random() * ALL_TEAMS.length);
+    while (idx2 === idx1) idx2 = Math.floor(Math.random() * ALL_TEAMS.length);
+    
+    const team1 = ALL_TEAMS[idx1];
+    const team2 = ALL_TEAMS[idx2];
+    
+    // Simulate prediction
+    const pred = predictMatch(team1, team2);
+    
+    // Update display
+    updateMatchDisplay(team1, team2, pred);
+    updateProgressDisplay(pred);
 }
 
-// Auto refresh every 6 hours
-setInterval(function() { location.reload(); }, 6 * 60 * 60 * 1000);
+function predictMatch(team1, team2) {
+    // Simple Elo-based prediction
+    const elo1 = getElo(team1);
+    const elo2 = getElo(team2);
+    const prob1 = elo1 / (elo1 + elo2);
+    
+    // Add randomness
+    const randomFactor = (Math.random() - 0.5) * 0.3;
+    let homeWin = Math.max(0.05, Math.min(0.95, prob1 + randomFactor));
+    let draw = 0.22 + (Math.random() - 0.5) * 0.08;
+    let awayWin = 1 - homeWin - draw;
+    
+    // Normalize
+    const total = homeWin + draw + awayWin;
+    homeWin = (homeWin / total * 100).toFixed(1);
+    draw = (draw / total * 100).toFixed(1);
+    awayWin = (awayWin / total * 100).toFixed(1);
+    
+    // Expected goals
+    const xg1 = (Math.random() * 2 + 0.5).toFixed(2);
+    const xg2 = (Math.random() * 2 + 0.5).toFixed(2);
+    
+    // BTTS and O2.5
+    const btts = Math.floor(Math.random() * 40 + 40);
+    const over25 = Math.floor(Math.random() * 40 + 30);
+    
+    return {
+        home: team1, away: team2,
+        homeWin: parseFloat(homeWin),
+        draw: parseFloat(draw),
+        awayWin: parseFloat(awayWin),
+        xg1: parseFloat(xg1), xg2: parseFloat(xg2),
+        btts, over25,
+        timestamp: new Date().toLocaleTimeString()
+    };
+}
+
+function getElo(team) {
+    const elos = {
+        'Argentina': 2150, 'France': 2120, 'Spain': 2080, 'England': 2060,
+        'Portugal': 2020, 'Netherlands': 2030, 'Brazil': 2050, 'Germany': 1980,
+        'Uruguay': 1970, 'Croatia': 1960, 'Colombia': 1910, 'Japan': 1900,
+        'Belgium': 2000, 'Switzerland': 1930, 'Mexico': 1860, 'United States': 1880,
+        'Italy': 1990, 'Senegal': 1890, 'Morocco': 1920, 'Norway': 1880,
+        'South Korea': 1840, 'Australia': 1820, 'Denmark': 1920, 'Canada': 1800,
+        'USA': 1880, 'Czech Republic': 1850, 'Paraguay': 1800, 'Ecuador': 1870,
+        'Egypt': 1830, 'Iran': 1830, 'Scotland': 1820, 'Ivory Coast': 1820,
+        'Sweden': 1840, 'Austria': 1890, 'Turkey': 1830, 'Haiti': 1680,
+        'Poland': 1850, 'Serbia': 1860, 'Wales': 1830, 'Ghana': 1810,
+        'Nigeria': 1840, 'Cameroon': 1800, 'Costa Rica': 1790, 'Jamaica': 1740,
+        'Tunisia': 1800, 'Algeria': 1820, 'Mali': 1780, 'Panama': 1760,
+        'Qatar': 1770, 'Saudi Arabia': 1780, 'Iraq': 1760, 'Jordan': 1720,
+        'Cape Verde': 1750, 'New Zealand': 1720, 'Uzbekistan': 1750, 'DR Congo': 1750,
+        'Bosnia and Herzegovina': 1780, 'Curaçao': 1650,
+    };
+    return elos[team] || 1750;
+}
+
+function updateMatchDisplay(team1, team2, pred) {
+    document.getElementById('cycleHome').innerHTML = '<strong>' + team1 + '</strong>';
+    document.getElementById('cycleAway').innerHTML = '<strong>' + team2 + '</strong>';
+    document.getElementById('cycleDraw').innerHTML = '';
+    
+    const maxVal = Math.max(pred.homeWin, pred.awayWin, pred.draw);
+    const winner = maxVal === pred.homeWin ? 'home' : maxVal === pred.awayWin ? 'away' : 'draw';
+    
+    document.getElementById('cyclePercent').innerHTML = '<span class="typing-cursor">' + maxVal.toFixed(1) + '%</span>';
+    document.getElementById('statusText').textContent = '⚡ ' + team1 + ' vs ' + team2 + ' → ' + pred.timestamp;
+}
+
+function updateProgressDisplay(pred) {
+    const section = document.getElementById('cycleSection');
+    if (!section) return;
+    
+    section.innerHTML = `
+        <div class="grid-2" style="width:100%;">
+            <div style="background:var(--bg-secondary);border-radius:10px;padding:14px;border:1px solid var(--border);">
+                <div style="font-weight:600;font-size:1.1rem;">${pred.home}</div>
+                <div style="font-size:0.7rem;color:var(--text-muted);">xG: ${pred.xg1}</div>
+                <div style="font-size:1.5rem;font-weight:800;color:var(--accent-green);margin-top:4px;">${pred.homeWin}%</div>
+            </div>
+            <div style="background:var(--bg-secondary);border-radius:10px;padding:14px;border:1px solid var(--border);">
+                <div style="font-weight:600;font-size:1.1rem;">${pred.away}</div>
+                <div style="font-size:0.7rem;color:var(--text-muted);">xG: ${pred.xg2}</div>
+                <div style="font-size:1.5rem;font-weight:800;color:var(--accent-red);margin-top:4px;">${pred.awayWin}%</div>
+            </div>
+        </div>
+        <div style="display:flex;gap:4px;margin-top:8px;justify-content:center;">
+            <span style="padding:4px 8px;background:rgba(16,185,129,0.15);border-radius:4px;font-size:0.75rem;">Home ${pred.homeWin}%</span>
+            <span style="padding:4px 8px;background:rgba(100,116,139,0.15);border-radius:4px;font-size:0.75rem;">Draw ${pred.draw}%</span>
+            <span style="padding:4px 8px;background:rgba(239,68,68,0.15);border-radius:4px;font-size:0.75rem;">Away ${pred.awayWin}%</span>
+        </div>
+        <div style="font-size:0.7rem;color:var(--text-muted);margin-top:6px;">BTTS: ${pred.btts}% | O2.5: ${pred.over25}%</div>
+    `;
+}
+
+function updateBracketDisplay(data) {
+    const container = document.getElementById('bracketSection');
+    if (!container || !data.r32_matchups) return;
+    
+    let html = '';
+    const stages = [
+        { label: '32 Besar', items: data.r32_matchups || [] },
+        { label: '16 Besar', items: data.r16_matchups || [] },
+        { label: '8 Besar', items: data.qf_matchups || [] },
+        { label: 'Semi Final', items: data.sf_matchups || [] },
+        { label: 'Final', items: data.final ? [data.final] : [] },
+    ];
+    
+    const paddings = ['0px', '15px', '30px', '60px', '90px'];
+    
+    stages.forEach((stage, idx) => {
+        html += '<div class="bracket-col" style="padding-top:' + paddings[idx] + ';">';
+        html += '<div class="bracket-stage-title">' + stage.label + '</div>';
+        
+        if (stage.label === 'Final' && stage.items.length > 0) {
+            const f = stage.items[0];
+            html += '<div class="bracket-match" style="border-color:rgba(245,158,11,0.5);background:rgba(245,158,11,0.12);">';
+            html += '<div class="team-row winner"><span>' + f.home + '</span><span style="font-size:0.7rem;">(' + f.home_prob + '%)</span></div>';
+            html += '<div style="text-align:center;font-size:0.7rem;color:var(--text-muted);padding:2px 0;">vs</div>';
+            html += '<div class="team-row ' + (parseFloat(f.home_prob) < 50 ? 'winner' : 'loser') + '"><span>' + f.away + '</span><span style="font-size:0.7rem;">(' + (100-parseFloat(f.home_prob)).toFixed(1) + '%)</span></div>';
+            html += '<div class="prob" style="color:var(--accent-green);font-weight:700;margin-top:6px;">🏆 ' + f.predicted_winner + '</div>';
+            html += '</div>';
+        } else {
+            stage.items.forEach(m => {
+                html += '<div class="bracket-match">';
+                html += '<div class="team-row ' + (m.predicted_winner === m.home ? 'winner' : 'loser') + '"><span>' + m.home + '</span></div>';
+                html += '<div class="team-row ' + (m.predicted_winner === m.away ? 'winner' : 'loser') + '"><span>' + m.away + '</span></div>';
+                html += '<div class="prob">→ ' + m.predicted_winner + '</div>';
+                html += '</div>';
+            });
+        }
+        html += '</div>';
+    });
+    
+    container.innerHTML = html;
+}
+
+function updateChampionDisplay(final) {
+    if (!final) return;
+    document.getElementById('finalHome').textContent = final.home || '-';
+    document.getElementById('finalAway').textContent = final.away || '-';
+    const winner = final.predicted_winner || final.home;
+    const prob = final.home_prob || '50';
+    document.getElementById('championDisplay').textContent = '🏆 ' + winner;
+    document.getElementById('championProb').textContent = winner + ' menang dengan probabilitas ' + prob + '%';
+}
+
+function forceUpdate() {
+    simulateNextMatch();
+    totalUpdates++;
+    document.getElementById('updateCounter').textContent = 'Updates: ' + totalUpdates + ' | Manual refresh';
+    document.getElementById('progressFill').style.width = '0%';
+}
 </script>
 {% endblock %}

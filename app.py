@@ -2,7 +2,7 @@
 World Cup Predictor - Flask Web Application
 Data source: FIFA.com live qualification standings (June 2026)
 """
-import json, os, sys, random
+import json, os, sys, random, time
 from datetime import datetime
 from flask import Flask, render_template, request, jsonify, redirect, url_for
 
@@ -15,8 +15,11 @@ from scraper.odds_scraper import OddsScraper, TeamDataCollector
 from scraper.live_scraper import load_live_data, save_live_data, generate_sample_data
 
 PROJECT_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+if not os.path.exists(os.path.join(PROJECT_DIR, "engine")):
+    PROJECT_DIR = r"C:\Users\ThinkPad\worldcup-predictor"
 LIVE_DATA_FILE = os.path.join(PROJECT_DIR, "data", "live_standings.json")
 SCHEDULE_FILE = os.path.join(PROJECT_DIR, "data", "schedule_predictions.json")
+CACHE_FILE = os.path.join(PROJECT_DIR, "data", "live_knockout_cache.json")
 
 app = Flask(__name__)
 app.config["SECRET_KEY"] = "worldcup2026-predictor-secret"
@@ -472,6 +475,33 @@ def generate_qualification_predictions(live_data):
 @app.route("/api/groups")
 def api_groups():
     return jsonify({"groups": WC2026_QUAL_GROUPS, "groups_id": WC2026_QUAL_GROUPS_ID})
+
+
+@app.route("/api/live-predictions")
+def api_live_predictions():
+    """Get live knockout predictions as JSON (cached)."""
+    cache_file = CACHE_FILE
+    
+    # Check if cache exists and is fresh (< 30 min old)
+    if os.path.exists(cache_file):
+        cache_age = time.time() - os.path.getmtime(cache_file)
+        if cache_age < 1800:  # 30 minutes
+            with open(cache_file, "r") as f:
+                return jsonify(json.load(f))
+    
+    # Generate new simulation
+    live_data = load_live_data()
+    if not live_data:
+        live_data = generate_sample_data()
+        save_live_data(live_data)
+    
+    knockout_sim = run_knockout_simulation(live_data)
+    
+    # Cache the result
+    with open(cache_file, "w") as f:
+        json.dump(knockout_sim, f, default=str)
+    
+    return jsonify(knockout_sim)
 
 
 @app.route("/api/live")
