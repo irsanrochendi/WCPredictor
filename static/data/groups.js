@@ -1,0 +1,15 @@
+/* FIFA LIVE STANDINGS - Auto-loaded from server */
+var G = {
+A:[{team:"Mexico",p:3,w:3,d:0,l:0,gf:6,ga:0,gd:6,pts:9,s:"Q"},{team:"SouthAfrica",p:3,w:1,d:1,l:1,gf:2,ga:3,gd:-1,pts:4,s:""},{team:"SouthKorea",p:3,w:1,d:0,l:2,gf:2,ga:3,gd:-1,pts:3,s:""},{team:"CzechRepublic",p:3,w:0,d:1,l:2,gf:2,ga:6,gd:-4,pts:1,s:"E"}],
+B:[{team:"Switzerland",p:3,w:2,d:1,l:0,gf:7,ga:3,gd:4,pts:7,s:"Q"},{team:"Canada",p:3,w:1,d:1,l:1,gf:8,ga:3,gd:5,pts:4,s:""},{team:"Bosnia",p:3,w:1,d:1,l:1,gf:5,ga:6,gd:-1,pts:4,s:""},{team:"Qatar",p:3,w:0,d:1,l:2,gf:2,ga:10,gd:-8,pts:1,s:"E"}],
+C:[{team:"Brazil",p:3,w:2,d:1,l:0,gf:7,ga:1,gd:6,pts:7,s:"Q"},{team:"Morocco",p:3,w:2,d:1,l:0,gf:6,ga:3,gd:3,pts:7,s:""},{team:"Scotland",p:3,w:1,d:0,l:2,gf:1,ga:4,gd:-3,pts:3,s:"E"},{team:"Haiti",p:3,w:0,d:0,l:3,gf:2,ga:8,gd:-6,pts:0,s:"E"}],
+D:[{team:"USA",p:2,w:2,d:0,l:0,gf:6,ga:1,gd:5,pts:6,s:""},{team:"Australia",p:2,w:1,d:0,l:1,gf:2,ga:2,gd:0,pts:3,s:""},{team:"Paraguay",p:2,w:1,d:0,l:1,gf:2,ga:4,gd:-2,pts:3,s:""},{team:"Turkey",p:2,w:0,d:0,l:2,gf:0,ga:3,gd:-3,pts:0,s:"E"}],
+E:[{team:"Germany",p:3,w:2,d:0,l:1,gf:10,ga:4,gd:6,pts:6,s:""},{team:"IvoryCoast",p:3,w:2,d:0,l:1,gf:4,ga:2,gd:2,pts:6,s:""},{team:"Ecuador",p:3,w:1,d:1,l:1,gf:2,ga:2,gd:0,pts:4,s:""},{team:"Curacao",p:3,w:0,d:1,l:2,gf:1,ga:9,gd:-8,pts:1,s:"E"}],
+F:[{team:"Netherlands",p:3,w:2,d:1,l:0,gf:10,ga:4,gd:6,pts:7,s:"Q"},{team:"Japan",p:3,w:1,d:2,l:0,gf:7,ga:3,gd:4,pts:5,s:""},{team:"Sweden",p:3,w:1,d:1,l:1,gf:7,ga:7,gd:0,pts:4,s:""},{team:"Tunisia",p:3,w:0,d:0,l:3,gf:2,ga:12,gd:-10,pts:0,s:"E"}],
+G:[{team:"Egypt",p:2,w:1,d:1,l:0,gf:4,ga:2,gd:2,pts:4,s:""},{team:"Iran",p:2,w:0,d:2,l:0,gf:2,ga:2,gd:0,pts:2,s:""},{team:"Belgium",p:2,w:0,d:2,l:0,gf:1,ga:1,gd:0,pts:2,s:""},{team:"NewZealand",p:2,w:0,d:1,l:1,gf:3,ga:5,gd:-2,pts:1,s:"E"}],
+H:[{team:"Spain",p:2,w:1,d:1,l:0,gf:4,ga:0,gd:4,pts:4,s:""},{team:"Uruguay",p:2,w:0,d:2,l:0,gf:3,ga:3,gd:0,pts:2,s:""},{team:"CapeVerde",p:2,w:0,d:2,l:0,gf:2,ga:2,gd:0,pts:2,s:""},{team:"SaudiArabia",p:2,w:0,d:1,l:1,gf:1,ga:5,gd:-4,pts:1,s:"E"}],
+I:[{team:"France",p:2,w:2,d:0,l:0,gf:6,ga:1,gd:5,pts:6,s:""},{team:"Norway",p:2,w:2,d:0,l:0,gf:7,ga:3,gd:4,pts:6,s:""},{team:"Senegal",p:2,w:0,d:0,l:2,gf:3,ga:6,gd:-3,pts:0,s:"E"},{team:"Iraq",p:2,w:0,d:0,l:2,gf:1,ga:7,gd:-6,pts:0,s:"E"}],
+J:[{team:"Argentina",p:2,w:2,d:0,l:0,gf:5,ga:0,gd:5,pts:6,s:""},{team:"Austria",p:2,w:1,d:0,l:1,gf:3,ga:3,gd:0,pts:3,s:""},{team:"Algeria",p:2,w:1,d:0,l:1,gf:2,ga:4,gd:-2,pts:3,s:""},{team:"Jordan",p:2,w:0,d:0,l:2,gf:2,ga:5,gd:-3,pts:0,s:"E"}],
+K:[{team:"Colombia",p:2,w:2,d:0,l:0,gf:4,ga:1,gd:3,pts:6,s:""},{team:"Portugal",p:2,w:1,d:1,l:0,gf:6,ga:1,gd:5,pts:4,s:""},{team:"DRCongo",p:2,w:0,d:1,l:1,gf:1,ga:2,gd:-1,pts:1,s:""},{team:"Uzbekistan",p:2,w:0,d:0,l:2,gf:1,ga:8,gd:-7,pts:0,s:"E"}],
+L:[{team:"England",p:2,w:1,d:1,l:0,gf:4,ga:2,gd:2,pts:4,s:""},{team:"Ghana",p:2,w:1,d:1,l:0,gf:1,ga:0,gd:1,pts:4,s:""},{team:"Croatia",p:2,w:1,d:0,l:1,gf:3,ga:4,gd:-1,pts:3,s:""},{team:"Panama",p:2,w:0,d:0,l:2,gf:0,ga:2,gd:-2,pts:0,s:"E"}]
+};

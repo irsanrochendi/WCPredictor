@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="id">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -12,184 +12,133 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--t);min-heig
 nav{background:rgba(17,24,39,.95);border-bottom:1px solid var(--br);position:sticky;top:0;z-index:100}
 .nc{max-width:1400px;margin:0 auto;padding:0 20px;display:flex;align-items:center;justify-content:space-between;height:56px}
 .nb{font-size:1.2rem;font-weight:800;background:linear-gradient(135deg,var(--g),var(--b));-webkit-background-clip:text;-webkit-text-fill-color:transparent;text-decoration:none}
-.nl{display:flex;gap:2px;list-style:none}.nl a{color:var(--t2);text-decoration:none;padding:6px 10px;border-radius:6px;font-size:.8rem}
-.nl a:hover,.nl a.ac{background:var(--card);color:var(--t)}
+.nl{display:flex;gap:2px;list-style:none}.nl a{color:var(--t2);text-decoration:none;padding:6px 10px;border-radius:6px;font-size:.8rem}.nl a.ac{color:var(--t);font-weight:600}
+.nl a:hover{background:var(--card);color:var(--t)}
 main{max-width:1400px;margin:0 auto;padding:20px}
-.ld{display:inline-block;width:8px;height:8px;background:var(--r);border-radius:50%;margin-right:6px;animation:p 1.2s infinite}
-@keyframes p{0%,100%{opacity:1}50%{opacity:.5}}
-.hero{text-align:center;padding:12px 0 20px}
-.hero h1{font-size:1.6rem;font-weight:900;background:linear-gradient(135deg,var(--g),var(--b));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
-.hero p{color:var(--t2);font-size:.85rem}
-.g4{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:10px}
-.cd{background:var(--card);border:1px solid var(--br);border-radius:12px;padding:16px;margin-bottom:16px}
-.ct{font-size:.95rem;font-weight:700;margin-bottom:10px;display:flex;align-items:center;gap:6px}
-.gc{background:var(--bg2);border:1px solid var(--br);border-radius:8px;padding:10px;margin-bottom:8px}
-.gt{font-weight:700;font-size:.82rem;color:var(--b);margin-bottom:6px}
-.tr{display:flex;justify-content:space-between;align-items:center;padding:4px 0;border-bottom:1px solid rgba(42,53,72,.3);font-size:.78rem}
-.tr:last-child{border-bottom:none}
-.tr .po{width:16px;font-weight:700;color:var(--mut)}.tr .nm{flex:1}
-.tr .st{color:var(--mut);font-size:.68rem;width:50px;text-align:right}
-.tr .pt{font-weight:700;width:24px;text-align:right;color:var(--g)}
-.bd{display:inline-flex;padding:2px 5px;border-radius:8px;font-size:.58rem;font-weight:600}
-.bg-g{background:rgba(16,185,129,.2);color:#34d399}
-.bg-r{background:rgba(239,68,68,.2);color:#f87171}
-.bg-b{background:rgba(59,130,246,.2);color:#60a5fa}
-.cb{text-align:center;padding:16px;background:linear-gradient(135deg,rgba(245,158,11,.15),rgba(16,185,129,.08));border:2px solid rgba(245,158,11,.4);border-radius:12px;margin-bottom:16px;transition:all .5s}
-.cb.up{border-color:var(--y);box-shadow:0 0 20px rgba(245,158,11,.3)}
+.hero{text-align:center;padding:12px 0 16px}
+.hero h1{font-size:1.5rem;font-weight:900;background:linear-gradient(135deg,var(--g),var(--b));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.hero p{color:var(--t2);font-size:.82rem}
+.cb{text-align:center;padding:14px;background:linear-gradient(135deg,rgba(245,158,11,.12),rgba(16,185,129,.06));border:2px solid rgba(245,158,11,.35);border-radius:12px;margin-bottom:14px}
 .cn{font-size:1.8rem;font-weight:900;background:linear-gradient(135deg,var(--y),#fbbf24);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
-.cs{font-size:.82rem;color:var(--t2);margin-top:4px}
+.cs{font-size:.78rem;color:var(--t2);margin-top:4px}
 .ft{display:flex;gap:4px;flex-wrap:wrap;margin-top:6px;justify-content:center}
-.ft span{padding:2px 5px;border-radius:4px;font-size:.58rem;background:rgba(59,130,246,.15);color:#60a5fa}
-.bc{display:flex;gap:6px;overflow-x:auto;padding:10px;background:rgba(10,14,26,.5);border-radius:10px}
-.bk{display:flex;flex-direction:column;gap:4px;min-width:135px}
-.mc{background:var(--bg2);border:1px solid var(--br);border-radius:5px;padding:4px 6px;font-size:.68rem}
-.mc .mn{font-size:.55rem;color:var(--y);font-weight:700;margin-bottom:1px}
-.mc .tl{display:flex;justify-content:space-between;padding:1px 0}
-.mc .tl.w{font-weight:700;color:var(--g)}.mc .tl.l{color:var(--mut)}
-.mc .pr{font-size:.55rem;color:var(--mut);text-align:right;margin-top:1px}
-.st{font-weight:700;font-size:.65rem;color:var(--b);text-align:center;margin-bottom:4px;text-transform:uppercase}
-.fm{border-color:rgba(245,158,11,.5)!important;background:rgba(245,158,11,.12)!important}
-.pt{background:var(--bg2);border:1px solid var(--br);border-radius:8px;padding:10px;margin-top:14px}
-.pr{display:flex;align-items:center;gap:6px;padding:4px 0;font-size:.78rem;border-bottom:1px solid rgba(42,53,72,.3)}
-.pr:last-child{border-bottom:none}
-.pr .rk{width:20px;font-weight:700;color:var(--b)}
-.pr .nm{flex:1;font-weight:600}
-.pb{height:5px;background:var(--bg);border-radius:3px;overflow:hidden;width:70px}
-.pf{height:100%;border-radius:3px;transition:width .5s;background:var(--g)}
-.pr .pc{width:40px;text-align:right;font-weight:700;color:var(--g)}
-.pr .od{width:45px;text-align:right;font-size:.68rem;color:var(--mut)}
-.lub{display:flex;justify-content:space-between;align-items:center;padding:8px 14px;background:var(--card);border:1px solid var(--br);border-radius:8px;margin-bottom:16px;font-size:.78rem;flex-wrap:wrap;gap:8px}
-.ub{display:inline-flex;align-items:center;gap:5px;padding:3px 10px;background:rgba(239,68,68,.15);border:1px solid rgba(239,68,68,.3);border-radius:16px;font-size:.7rem;color:#f87171}
-.cd{font-family:monospace;color:var(--y);font-weight:700}
-.btn{padding:6px 14px;background:linear-gradient(135deg,#3b82f6,#2563eb);color:white;border:none;border-radius:6px;font-size:.72rem;font-weight:600;cursor:pointer}
+.ft span{padding:2px 5px;border-radius:4px;font-size:.55rem;background:rgba(59,130,246,.13);color:#60a5fa}
+.g4{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:10px}
+.cd{background:var(--card);border:1px solid var(--br);border-radius:12px;padding:14px;margin-bottom:14px}
+.ct{font-size:.9rem;font-weight:700;margin-bottom:10px;display:flex;align-items:center;gap:6px}
+.gc{background:var(--bg2);border:1px solid var(--br);border-radius:8px;padding:8px;margin-bottom:6px}
+.gt{font-weight:700;font-size:.78rem;color:var(--b);margin-bottom:4px;text-align:center}
+.tr{display:flex;align-items:center;padding:3px 0;border-bottom:1px solid rgba(42,53,72,.3);font-size:.76rem}
+.tr:last-child{border-bottom:none}.tr .po{width:14px;font-weight:700;color:var(--mut)}
+.tr .nm{flex:1;font-size:.75rem}.tr .st{width:50px;text-align:right;color:var(--mut);font-size:.65rem}
+.tr .pt{font-weight:700;width:22px;text-align:right;color:var(--g)}.tr .bd{margin-left:auto}
+.bd{font-size:.52rem;padding:1px 4px;border-radius:6px;font-weight:600}
+.bd.q{background:rgba(16,185,129,.2);color:#34d399}.bd.e{background:rgba(239,68,68,.2);color:#f87171}
+.bc{display:flex;gap:5px;overflow-x:auto;padding:10px;background:rgba(10,14,26,.4);border-radius:10px}
+.bk{display:flex;flex-direction:column;gap:3px;min-width:130px}
+.mc{background:var(--bg2);border:1px solid var(--br);border-radius:5px;padding:3px 5px;font-size:.65rem}
+.mc .mn{font-size:.52rem;color:var(--y);font-weight:700}
+.mc .tl{padding:0}.mc .tl.w{font-weight:700;color:var(--g)}
+.mc .tl.l{color:var(--mut)}.mc .pr{font-size:.52rem;color:var(--mut);text-align:right}
+.st{font-weight:700;font-size:.6rem;color:var(--b);text-align:center;margin-bottom:3px;text-transform:uppercase;letter-spacing:.03em}
+.fm{border-color:rgba(245,158,11,.5)!important;background:rgba(245,158,11,.1)!important}
+.pt{background:var(--bg2);border:1px solid var(--br);border-radius:8px;padding:10px;margin-top:12px}
+.pr{display:flex;align-items:center;gap:5px;padding:3px 0;font-size:.76rem;gap:6px}
+.pr .rk{width:18px;font-weight:700;color:var(--b);font-size:.7rem}
+.pr .nm{flex:1;font-weight:600}.pb{height:4px;background:var(--bg);border-radius:2px;width:60px;overflow:hidden}
+.pf{height:100%;border-radius:2px;background:var(--g)}.pr .pc{width:35px;text-align:right;font-weight:700;color:var(--g);font-size:.7rem}
+.pr .od{width:40px;text-align:right;color:var(--mut);font-size:.65rem}
+.b7{display:flex;align-items:center;padding:6px 14px;background:var(--card);border:1px solid var(--br);border-radius:8px;margin-bottom:14px;font-size:.75rem;gap:12px;flex-wrap:wrap}
+.btn{padding:5px 12px;background:linear-gradient(135deg,#3b82f6,#2563eb);color:white;border:none;border-radius:5px;font-size:.7rem;font-weight:600;cursor:pointer}
+.ld{display:inline-block;width:7px;height:7px;background:var(--r);border-radius:50%;margin-right:5px;animation:p 1.2s infinite}
+@keyframes p{0%,100%{opacity:1}50%{opacity:.4}}
 </style>
 </head>
 <body>
-<nav><div class="nc">
-<a href="/" class="nb">⚽ WC2026 Predictor</a>
-<ul class="nl">
-<li><a href="/">🏠 Dashboard</a></li>
-<li><a href="/live-predictions" class="ac"><span class="ld"></span>Live Group FIFA WC2026</a></li>
-<li><a href="/predict">🔮 Predict</a></li>
-<li><a href="/tournament">🏆 Tournament</a></li>
-<li><a href="/players">👤 Players</a></li>
-</ul></div></nav>
+<nav><div class="nc"><a href="/" class="nb">⚽ WC2026 Predictor</a>
+<ul class="nl"><li><a href="/">🏠 Dashboard</a></li><li><a href="/" class="ac"><span class="ld"></span>Live FIFA</a></li>
+<li><a href="/predict">🔮 Predict</a></li><li><a href="/tournament">🏆 Tournament</a></li><li><a href="/players">👤 Players</a></li></ul></div></nav>
 
 <main>
 <div class="hero">
-<h1><span class="ld"></span>🔮 Live Group FIFA WC2026</h1>
-<p>Prediksi berbasis Elo, xG, statistik pemain, odds betting & faktor hoki</p>
+<h1><span class="ld"></span>Live Group FIFA WC2026</h1>
+<p>Data live dari FIFA.com + Prediksi AI (xG, Elo, Odds, Hoki)</p>
 </div>
 
 <div class="cb" id="cb">
-<div style="font-size:.65rem;color:var(--mut);margin-bottom:4px">🏆 PREDIKSI JUARA (500 simulasi)</div>
+<div style="font-size:.62rem;color:var(--mut);margin-bottom:3px">🏆 PREDIKSI JUARA</div>
 <div class="cn" id="cn">Loading...</div>
-<div class="cs" id="cs">Running advanced model...</div>
+<div class="cs" id="cs">Computing...</div>
 <div class="ft" id="cf"></div>
 </div>
 
 <div class="cd">
-<div class="ct">🔴 Live Kualifikasi FIFA World Cup 2026</div>
-<div class="lub">
-<span style="color:var(--g)">● LIVE</span>
-<span id="lu">Last: -</span>
-<span id="sc" style="color:var(--mut)">Sim: -</span>
-<button class="btn" id="rfBtn" onclick="doRefresh()">↻ Refresh Now</button>
-</div>
+<div class="ct">🔴 Klasemen Live FIFA.com</div>
+<div class="b7"><span id="lu">Loading...</span><span id="sc" style="color:var(--mut)">-</span>
+<button class="btn" id="rfBtn" onclick="doRefresh()">↻ Refresh</button></div>
 <div class="g4" id="gc"></div>
 </div>
 
-<div class="cd">
-<div class="ct">📊 Official FIFA Bracket (M73-M103)</div>
-<div class="bc" id="bc"><div style="padding:20px;color:var(--mut);text-align:center">Loading bracket...</div></div>
-</div>
+<div class="cd"><div class="ct">📊 Official FIFA Bracket (M73-M103)</div>
+<div class="bc" id="bc"><div style="padding:16px;color:var(--mut);text-align:center;text-align:center">Loading...</div></div></div>
 
-<div class="pt">
-<div class="ct" style="margin-bottom:8px">📋 Probabilitas Fase Gugur</div>
-<div id="pt"></div>
-</div>
+<div class="pt"><div class="ct">📋 Tabel Probabilitas</div><div id="pt"></div></div>
 </main>
 
+<script src="/api/groups.js"></script>
 <script>
-var T = {
-Argentina:{e:2150,x:2.1,g:.6,f:.85,ft:.05,h:.08,p:9.2,o:3.5},
-France:{e:2120,x:2.0,g:.7,f:.80,ft:.08,h:.05,p:9.0,o:4.2},
-Spain:{e:2080,x:1.9,g:.8,f:.82,ft:.06,h:.06,p:8.8,o:5.0},
-England:{e:2060,x:1.8,g:.9,f:.78,ft:.10,h:.07,p:8.9,o:5.5},
-Brazil:{e:2050,x:1.9,g:.8,f:.76,ft:.07,h:.06,p:8.7,o:6.0},
-Germany:{e:1980,x:1.7,g:.9,f:.72,ft:.12,h:.08,p:8.5,o:7.0},
-Netherlands:{e:2030,x:1.8,g:.8,f:.79,ft:.06,h:.05,p:8.6,o:8.0},
-Portugal:{e:2020,x:1.8,g:.9,f:.77,ft:.09,h:.05,p:8.5,o:9.0},
-Belgium:{e:2000,x:1.6,g:1.0,f:.68,ft:.15,h:.06,p:8.3,o:12.0},
-Uruguay:{e:1970,x:1.6,g:1.0,f:.74,ft:.08,h:.07,p:8.0,o:15.0},
-Croatia:{e:1960,x:1.5,g:1.0,f:.70,ft:.14,h:.05,p:8.0,o:18.0},
-Italy:{e:1990,x:1.6,g:1.0,f:.73,ft:.10,h:.06,p:8.4,o:10.0},
-Colombia:{e:1910,x:1.5,g:1.1,f:.72,ft:.07,h:.08,p:7.8,o:22.0},
-Japan:{e:1900,x:1.4,g:1.1,f:.75,ft:.05,h:.04,p:7.8,o:25.0},
-Switzerland:{e:1930,x:1.4,g:1.1,f:.71,ft:.08,h:.06,p:7.7,o:28.0},
-Mexico:{e:1860,x:1.3,g:1.2,f:.68,ft:.06,h:.10,p:7.5,o:30.0},
-USA:{e:1880,x:1.4,g:1.2,f:.72,ft:.05,h:.09,p:7.6,o:26.0},
-Norway:{e:1880,x:1.5,g:1.2,f:.74,ft:.04,h:.05,p:7.5,o:35.0},
-Senegal:{e:1890,x:1.3,g:1.2,f:.70,ft:.06,h:.04,p:7.4,o:40.0},
-Australia:{e:1820,x:1.2,g:1.3,f:.65,ft:.05,h:.07,p:7.2,o:50.0},
-Canada:{e:1800,x:1.2,g:1.4,f:.62,ft:.04,h:.06,p:7.1,o:60.0},
-Poland:{e:1850,x:1.3,g:1.3,f:.65,ft:.08,h:.05,p:7.3,o:45.0},
-SouthKorea:{e:1840,x:1.2,g:1.3,f:.68,ft:.04,h:.05,p:7.2,o:55.0},
-Ecuador:{e:1870,x:1.3,g:1.3,f:.70,ft:.05,h:.08,p:7.3,o:42.0},
-Austria:{e:1890,x:1.4,g:1.2,f:.73,ft:.05,h:.05,p:7.6,o:38.0},
-CzechRepublic:{e:1850,x:1.2,g:1.3,f:.68,ft:.06,h:.05,p:7.3,o:50.0},
-Turkey:{e:1830,x:1.3,g:1.4,f:.62,ft:.06,h:.07,p:7.2,o:65.0},
-Scotland:{e:1820,x:1.1,g:1.4,f:.60,ft:.05,h:.06,p:7.0,o:80.0},
-Iran:{e:1830,x:1.1,g:1.3,f:.68,ft:.04,h:.05,p:7.0,o:70.0},
-IvoryCoast:{e:1820,x:1.2,g:1.4,f:.65,ft:.04,h:.04,p:7.0,o:90.0},
-Ghana:{e:1810,x:1.1,g:1.4,f:.62,ft:.04,h:.04,p:6.9,o:100.0},
-Egypt:{e:1830,x:1.2,g:1.3,f:.68,ft:.04,h:.04,p:7.0,o:85.0},
-Morocco:{e:1920,x:1.3,g:1.1,f:.75,ft:.04,h:.04,p:7.5,o:32.0},
-CapeVerde:{e:1750,x:1.0,g:1.4,f:.60,ft:.03,h:.03,p:6.5,o:150.0},
-NewZealand:{e:1720,x:.8,g:1.6,f:.45,ft:.03,h:.05,p:6.0,o:200.0},
-Denmark:{e:1920,x:1.4,g:1.1,f:.72,ft:.06,h:.05,p:7.8,o:30.0},
-Sweden:{e:1840,x:1.3,g:1.3,f:.65,ft:.07,h:.05,p:7.5,o:55.0}
+var T={
+Argentina:{e:2150,x:2.1,g:.6,f:.85,o:3.5},France:{e:2120,x:2.0,g:.7,f:.80,o:4.2},
+Spain:{e:2080,x:1.9,g:.8,f:.82,o:5.0},England:{e:2060,x:1.8,g:.9,f:.78,o:5.5},
+Brazil:{e:2050,x:1.9,g:.8,f:.76,o:6.0},Germany:{e:1980,x:1.7,g:.9,f:.72,o:7.0},
+Netherlands:{e:2030,x:1.8,g:.8,f:.79,o:8.0},Portugal:{e:2020,x:1.8,g:.9,f:.77,o:9.0},
+Belgium:{e:2000,x:1.6,g:1.0,f:.68,o:12.0},Uruguay:{e:1970,x:1.6,g:1.0,f:.74,o:15.0},
+Croatia:{e:1960,x:1.5,g:1.0,f:.70,o:18.0},Italy:{e:1990,x:1.6,g:1.0,f:.73,o:10.0},
+Colombia:{e:1910,x:1.5,g:1.1,f:.72,o:22.0},Japan:{e:1900,x:1.4,g:1.1,f:.75,o:25.0},
+Switzerland:{e:1930,x:1.4,g:1.1,f:.71,o:28.0},Mexico:{e:1860,x:1.3,g:1.2,f:.68,o:30.0},
+USA:{e:1880,x:1.4,g:1.2,f:.72,o:26.0},Norway:{e:1880,x:1.5,g:1.2,f:.74,o:35.0},
+Senegal:{e:1890,x:1.3,g:1.2,f:.70,o:40.0},Australia:{e:1820,x:1.2,g:1.3,f:.65,o:50.0},
+Canada:{e:1800,x:1.2,g:1.4,f:.62,o:60.0},Poland:{e:1850,x:1.3,g:1.3,f:.65,o:45.0},
+SouthKorea:{e:1840,x:1.2,g:1.3,f:.68,o:55.0},Ecuador:{e:1870,x:1.3,g:1.3,f:.70,o:42.0},
+Austria:{e:1890,x:1.4,g:1.2,f:.73,o:38.0},CzechRepublic:{e:1850,x:1.2,g:1.3,f:.68,o:50.0},
+Turkey:{e:1830,x:1.3,g:1.4,f:.62,o:65.0},Scotland:{e:1820,x:1.1,g:1.4,f:.60,o:80.0},
+Iran:{e:1830,x:1.1,g:1.3,f:.68,o:70.0},IvoryCoast:{e:1820,x:1.2,g:1.4,f:.65,o:90.0},
+Ghana:{e:1810,x:1.1,g:1.4,f:.62,o:100.0},Egypt:{e:1830,x:1.2,g:1.3,f:.68,o:85.0},
+Morocco:{e:1920,x:1.3,g:1.1,f:.75,o:32.0},CapeVerde:{e:1750,x:1.0,g:1.4,f:.60,o:150.0},
+NewZealand:{e:1720,x:.8,g:1.6,f:.45,o:200.0},Denmark:{e:1920,x:1.4,g:1.1,f:.72,o:30.0},
+Sweden:{e:1840,x:1.3,g:1.3,f:.65,o:55.0},SouthAfrica:{e:1720,x:.9,g:1.3,f:.55,o:100.0},
+Bosnia:{e:1780,x:1.0,g:1.3,f:.60,o:90.0},Haiti:{e:1680,x:.8,g:1.5,f:.45,o:150.0},
+SaudiArabia:{e:1790,x:.9,g:1.4,f:.50,o:120.0},Curacao:{e:1650,x:.8,g:1.6,f:.40,o:200.0},
+Qatar:{e:1770,x:.9,g:1.5,f:.45,o:180.0},Algeria:{e:1820,x:1.0,g:1.4,f:.65,o:70.0},
+Iraq:{e:1770,x:.9,g:1.5,f:.50,o:150.0},Jordan:{e:1730,x:.8,g:1.5,f:.40,o:200.0},
+DRCongo:{e:1750,x:.9,g:1.4,f:.60,o:100.0},Uzbekistan:{e:1750,x:.9,g:1.5,f:.45,o:150.0},
+Panama:{e:1760,x:.8,g:1.5,f:.40,o:200.0},Paraguay:{e:1800,x:1.0,g:1.4,f:.60,o:80.0},
+Tunisia:{e:1800,x:.9,g:1.5,f:.55,o:120.0}
 };
 
-var G = {
-A:[{t:"Mexico",p:7,gf:3,ga:0,gd:3,s:"Q"},{t:"SouthKorea",p:4,gf:2,ga:2,gd:0,s:""},{t:"CzechRepublic",p:2,gf:2,ga:3,gd:-1,s:""},{t:"SouthAfrica",p:2,gf:1,ga:3,gd:-2,s:"E"}],
-B:[{t:"Canada",p:4,gf:7,ga:1,gd:6,s:"Q"},{t:"Switzerland",p:4,gf:5,ga:2,gd:3,s:""},{t:"Bosnia",p:1,gf:2,ga:5,gd:-3,s:""},{t:"Qatar",p:1,gf:1,ga:7,gd:-6,s:"E"}],
-C:[{t:"Brazil",p:4,gf:3,ga:1,gd:2,s:""},{t:"Morocco",p:2,gf:3,ga:2,gd:1,s:""},{t:"Scotland",p:1,gf:4,ga:5,gd:-1,s:"E"},{t:"Haiti",p:0,gf:0,ga:4,gd:-4,s:"E"}],
-D:[{t:"USA",p:6,gf:6,ga:0,gd:6,s:"Q"},{t:"Australia",p:4,gf:2,ga:0,gd:2,s:""},{t:"Paraguay",p:1,gf:4,ga:5,gd:-1,s:""},{t:"Turkey",p:1,gf:3,ga:6,gd:-3,s:"E"}],
-E:[{t:"Germany",p:6,gf:7,ga:2,gd:5,s:"Q"},{t:"IvoryCoast",p:4,gf:4,ga:3,gd:1,s:""},{t:"Ecuador",p:1,gf:2,ga:3,gd:-1,s:""},{t:"Curacao",p:1,gf:1,ga:7,gd:-6,s:"E"}],
-F:[{t:"Netherlands",p:4,gf:5,ga:2,gd:3,s:""},{t:"Japan",p:4,gf:4,ga:2,gd:2,s:""},{t:"Sweden",p:1,gf:6,ga:9,gd:-3,s:"E"},{t:"Tunisia",p:0,gf:1,ga:10,gd:-9,s:"E"}],
-G:[{t:"Colombia",p:7,gf:5,ga:2,gd:3,s:"Q"},{t:"Egypt",p:4,gf:4,ga:4,gd:0,s:""},{t:"Iran",p:4,gf:3,ga:3,gd:0,s:""},{t:"NewZealand",p:1,gf:2,ga:6,gd:-4,s:"E"}],
-H:[{t:"Spain",p:7,gf:6,ga:2,gd:4,s:"Q"},{t:"Uruguay",p:6,gf:5,ga:3,gd:2,s:""},{t:"CapeVerde",p:4,gf:3,ga:4,gd:-1,s:""},{t:"SaudiArabia",p:2,gf:3,ga:5,gd:-2,s:"E"}],
-I:[{t:"France",p:7,gf:7,ga:2,gd:5,s:"Q"},{t:"Norway",p:6,gf:6,ga:4,gd:2,s:""},{t:"Senegal",p:4,gf:5,ga:5,gd:0,s:""},{t:"Iraq",p:1,gf:2,ga:7,gd:-5,s:"E"}],
-J:[{t:"Argentina",p:9,gf:8,ga:1,gd:7,s:"Q"},{t:"Austria",p:6,gf:5,ga:4,gd:1,s:""},{t:"Algeria",p:4,gf:4,ga:5,gd:-1,s:""},{t:"Jordan",p:1,gf:2,ga:8,gd:-6,s:"E"}],
-K:[{t:"Portugal",p:7,gf:6,ga:2,gd:4,s:"Q"},{t:"Poland",p:4,gf:4,ga:3,gd:1,s:""},{t:"DRCongo",p:4,gf:3,ga:4,gd:-1,s:""},{t:"Uzbekistan",p:1,gf:2,ga:6,gd:-4,s:"E"}],
-L:[{t:"England",p:7,gf:5,ga:1,gd:4,s:"Q"},{t:"Croatia",p:6,gf:6,ga:3,gd:3,s:""},{t:"Ghana",p:4,gf:4,ga:5,gd:-1,s:""},{t:"Panama",p:1,gf:2,ga:7,gd:-5,s:"E"}]
-};
-
-function gt(t){return T[t]||{e:1700,x:1,g:1.2,f:.5,ft:.05,h:.05,p:6.5,o:100}}
+function gt(t){return T[t]||{e:1700,x:1,g:1.2,f:.5,o:100}}
 
 function pred(h,a){
 var hd=gt(h),ad=gt(a),ed=hd.e-ad.e;
 var ep=1/(1+Math.pow(10,-ed/400));
 var xg=(hd.x-hd.g)-(ad.x-ad.g);
 var xp=Math.max(.1,Math.min(.9,.5+xg*.15));
-var pp=Math.max(.2,Math.min(.8,.5+(hd.p-ad.p)*.08));
-var fp=Math.max(.2,Math.min(.8,.5+(hd.f-ad.f)*.4));
+var pp=Math.max(.2,Math.min(.8,.5+(hd.x-ad.g)*.2));
+var fp=hd.f;
 var op=(1/hd.o)/((1/hd.o)+(1/ad.o));
-var bp=ep*.3+xp*.2+pp*.15+fp*.15+op*.1+hd.h*.05+(ad.ft-hd.ft+.05)*.05;
-bp=Math.max(.05,Math.min(.95,bp));
-if(Math.random()<.12){var u=Math.min(.4,Math.abs(ed)/1000)*(.5+Math.random()*.5);bp+=(ed>0?-u:u);bp=Math.max(.05,Math.min(.95,bp))}
-var dr=Math.max(.12,Math.min(.3,.22-Math.abs(ed)/2000));
-var hw=bp*(1-dr)*100,aw=(1-bp)*(1-dr)*100,dw=dr*100,tl=hw+aw+dw;
-return{hw:hw/tl*100,dr:dw/tl*100,aw:aw/tl*100,w:Math.random()<bp?h:a};
+var bp=ep*.3+xp*.2+pp*.15+fp*.15+op*.1+.05;
+bp=Math.max(.08,Math.min(.92,bp));
+if(Math.random()<.12)bp+=(ed>0?-1:1)*Math.random()*.2;
+var dr=Math.max(.1,.22-Math.abs(ed)/2000);
+return{hw:bp*(1-dr)*100,dr:dr*100,aw:(1-bp)*(1-dr)*100,w:Math.random()<bp?h:a};
 }
 
 function build(){
 var gw={},gr={},th=[];
-for(var g in G){var t=G[g].slice().sort(function(a,b){return b.p-a.p||b.gd-a.gd||b.gf-a.gf});var l=g.replace("Grup ","");if(t[0])gw[l]=t[0].t;if(t[1])gr[l]=t[1].t;if(t[2])th.push(t[2])}
-th.sort(function(a,b){return b.p-a.p||b.gd-a.gd||b.gf-a.gf});
-var s={Germany:"Germany",Mexico:"Mexico",Argentina:"Argentina",USA:"United States",wA:gw.A,rA:gr.A,wB:gw.B,rB:gr.B,wC:gw.C,rC:gr.C,wD:gw.D,rD:gr.D,wE:gw.E,rE:gr.E,wF:gw.F,rF:gr.F,wG:gw.G,rG:gr.G,wH:gw.H,rH:gr.H,wI:gw.I,rI:gr.I,wJ:gw.J,rJ:gr.J,wK:gw.K,rK:gr.K,wL:gw.L,rL:gr.L,t1:th[0]?th[0].t:"TBD",t2:th[1]?th[1].t:"TBD",t3:th[2]?th[2].t:"TBD",t4:th[3]?th[3].t:"TBD",t5:th[4]?th[4].t:"TBD",t6:th[5]?th[5].t:"TBD",t7:th[6]?th[6].t:"TBD",t8:th[7]?th[7].t:"TBD"};
-var r32=[{id:"M73",h:s.rA,a:s.rB},{id:"M74",h:s.Germany,a:s.t1},{id:"M75",h:s.wF,a:s.rC},{id:"M76",h:s.wC,a:s.rF},{id:"M77",h:s.wI,a:s.t2},{id:"M78",h:s.rE,a:s.rI},{id:"M79",h:s.Mexico,a:s.t3},{id:"M80",h:s.wL,a:s.t4},{id:"M81",h:s.USA,a:s.t5},{id:"M82",h:s.wG,a:s.t6},{id:"M83",h:s.rK,a:s.rL},{id:"M84",h:s.wH,a:s.rJ},{id:"M85",h:s.wB,a:s.t7},{id:"M86",h:s.Argentina,a:s.rH},{id:"M87",h:s.wK,a:s.t8},{id:"M88",h:s.rD,a:s.rG}];
+for(var g in G){var t=G[g].slice().sort(function(a,b){return b.pts-a.pts||b.gd-a.gd||b.gf-a.gf});if(t[0])gw[g]=t[0].team;if(t[1])gr[g]=t[1].team;if(t[2])th.push(t[2])}
+th.sort(function(a,b){return b.pts-a.pts||b.gd-a.gd||b.gf-a.gf});
+var s={G:gw.A,rA:gr.A,H:gw.B,rB:gr.B,I:gw.C,rC:gr.C,J:gw.D,rD:gr.D,K:gw.E,rE:gr.E,L:gw.F,rF:gr.F,M:gw.G,rG:gr.G,N:gw.H,rH:gr.H,O:gw.I,rI:gr.I,P:gw.J,rJ:gr.J,Q:gw.K,rK:gr.K,R:gw.L,rL:gr.L,t1:th[0]?th[0].team:"TBD",t2:th[1]?th[1].team:"TBD",t3:th[2]?th[2].team:"TBD",t4:th[3]?th[3].team:"TBD",t5:th[4]?th[4].team:"TBD",t6:th[5]?th[5].team:"TBD",t7:th[6]?th[6].team:"TBD",t8:th[7]?th[7].team:"TBD"};
+var r32=[{id:"M73",h:s.rA,a:s.rB},{id:"M74",h:"Germany",a:s.t1},{id:"M75",h:s.L,a:s.rC},{id:"M76",h:s.I,a:s.rF},{id:"M77",h:s.O,a:s.t2},{id:"M78",h:s.rE,a:s.rI},{id:"M79",h:"Mexico",a:s.t3},{id:"M80",h:s.R,a:s.t4},{id:"M81",h:"USA",a:s.t5},{id:"M82",h:s.M,a:s.t6},{id:"M83",h:s.rK,a:s.rL},{id:"M84",h:s.N,a:s.rJ},{id:"M85",h:s.H,a:s.t7},{id:"M86",h:"Argentina",a:s.rH},{id:"M87",h:s.Q,a:s.t8},{id:"M88",h:s.rD,a:s.rG}];
 for(var i=0;i<16;i++){var p=pred(r32[i].h,r32[i].a);r32[i].w=p.w}
 var r16=[],qf=[],sf=[],fn;
 var rp=[[1,6],[0,2],[3,4],[5,7],[10,11],[8,9],[13,15],[12,14]];
@@ -200,49 +149,28 @@ fn={id:"M103",h:sf[0].w,a:sf[1].w};var p=pred(fn.h,fn.a);fn.w=p.w;
 return{r32:r32,r16:r16,qf:qf,sf:sf,final:fn}
 }
 
-function simulate(n){
-var cc={};for(var t in T)cc[t]=0;
-for(var s=0;s<n;s++){var b=build();cc[b.final.w]++}
-var table=[];for(var t in T){table.push({t:t,w:cc[t]/n*100,o:T[t].e,im:100/T[t].o})}
-table.sort(function(a,b){return b.w-a.w});return table
-}
+function sim(n){var cc={};for(var t in T)cc[t]=0;for(var s=0;s<n;s++){cc[build().final.w]++}var tb=[];for(var t in T)tb.push({t:t,w:cc[t]/n*100,o:T[t].e,im:100/T[t].o});tb.sort(function(a,b){return b.w-a.w});return tb}
 
 function renderGroups(){
-var c=document.getElementById("gc"),h="";
-for(var g in G){h+='<div class="gc"><div class="gt">'+g+"</div>";for(var i=0;i<G[g].length;i++){var t=G[g][i];var bd=t.s=="Q"?'<span class="bd bg-g">Q</span>':t.s=="E"?'<span class="bd bg-r">E</span>':'<span class="bd bg-b">'+t.p+"p</span>";h+='<div class="tr"><span class="po">'+(i+1)+'</span><span class="nm">'+t.t+'</span><span class="st">'+t.gf+"-"+t.ga+'</span><span class="pt">'+t.p+"</span></div>"}h+="</div>"}c.innerHTML=h
+var c=document.getElementById("gc"),h="";for(var g in G){h+='<div class="gc"><div class="gt">'+g+"</div>";for(var i=0;i<G[g].length;i++){var t=G[g][i];var bd=t.s=="Q"?'<span class="bd q">Q</span><span class="bd e" style="margin-left:2px">✅</span>':t.s=="E"?'<span class="bd e">E</span>':'';h+='<div class="tr"><span class="po">'+(i+1)+'</span><span class="nm">'+t.team+'</span><span class="st">'+t.gf+'-'+t.ga+'</span><span class="pt">'+t.pts+'</span><span class="bd">'+bd+'</span></div>'}h+="</div>"}c.innerHTML=h
 }
 
 function renderBracket(b){
 var c=document.getElementById("bc");
 var st=[{l:"32 BESAR",i:b.r32},{l:"16 BESAR",i:b.r16},{l:"8 BESAR",i:b.qf},{l:"SEMI FINAL",i:b.sf},{l:"FINAL",i:[b.final]}];
-var ph=["0px","10px","20px","40px","60px"],h="";
+var ph=["0px","8px","16px","32px","48px"],h="";
 st.forEach(function(s,idx){h+='<div class="bk" style="padding-top:'+ph[idx]+'"><div class="st">'+s.l+"</div>";s.i.forEach(function(m){var f=idx==4;h+='<div class="mc'+(f?' fm':'')+'"><div class="mn">'+m.id+'</div><div class="tl '+(m.w===m.h?'w':'l')+'"><span>'+m.h+'</span></div><div class="tl '+(m.w===m.a?'w':'l')+'"><span>'+m.a+'</span></div>'+(f?'<div class="pr" style="color:var(--g);font-weight:700">🏆 '+m.w+'</div>':'<div class="pr">→ '+m.w+'</div>')+"</div>"});h+="</div>"});c.innerHTML=h
 }
 
 function renderProb(t){
-var c=document.getElementById("pt"),h="";
-t.slice(0,12).forEach(function(r,i){h+='<div class="pr"><span class="rk">'+(i+1)+'</span><span class="nm">'+r.t+'</span><div class="pb"><div class="pf" style="width:'+Math.min(100,r.w*2)+'%"></div></div><span class="pc">'+r.w.toFixed(1)+'%</span><span class="od">'+r.o.toFixed(0)+"</span></div>"});c.innerHTML=h
+var c=document.getElementById("pt"),h="";t.slice(0,12).forEach(function(r,i){h+='<div class="pr"><span class="rk">'+(i+1)+'</span><span class="nm">'+r.t+'</span><div class="pb"><div class="pf" style="width:'+Math.min(100,r.w*2)+'%"></div></div><span class="pc">'+r.w.toFixed(1)+'%</span><span class="od">'+r.o.toFixed(0)+"</span></div>"});c.innerHTML=h
 }
 
-function updateChamp(t){
-var top=t[0];
-document.getElementById("cn").textContent="🏆 "+top.t;
-document.getElementById("cs").textContent=top.t+" memimpin "+top.w.toFixed(1)+"% | Odds: "+top.o.toFixed(0)+" (implied: "+top.im.toFixed(1)+"%)";
-var td=T[top.t];
-document.getElementById("cf").innerHTML='<span>Elo:'+td.e+'</span><span>xG:'+td.x.toFixed(1)+'</span><span>Form:'+(td.f*100).toFixed(0)+'%</span><span>Players:'+td.p.toFixed(1)+'</span><span>Odds:'+td.o.toFixed(0)+'</span>'
-}
+function updateChamp(t){var top=t[0];document.getElementById("cn").textContent="🏆 "+top.t;document.getElementById("cs").textContent=top.t+" memimpin "+top.w.toFixed(1)+"% | Odds: "+top.o.toFixed(0)+" ("+top.im.toFixed(1)+" implied)";var td=T[top.t];document.getElementById("cf").innerHTML='<span>Elo:'+td.e+'</span><span>xG:'+td.x.toFixed(1)+'</span><span>Form:'+(td.f*100).toFixed(0)+'%</span><span>Odds:'+td.o.toFixed(0)+'</span>'}
 
-function doRefresh(){
-var t=simulate(50);
-renderBracket(build());renderProb(t);updateChamp(t);
-document.getElementById("lu").textContent="Last: "+new Date().toLocaleTimeString();
-document.getElementById("sc").textContent="Sim: #"+Date.now()%1000;
-var box=document.getElementById("cb");box.classList.add("up");setTimeout(function(){box.classList.remove("up")},500)
-var btn=document.getElementById("rfBtn");if(btn){btn.style.opacity=".5";btn.textContent="...";setTimeout(function(){btn.style.opacity="1";btn.textContent="↻ Refresh Now"},800)}
-}
+function doRefresh(){var t=sim(20);renderBracket(build());renderProb(t);updateChamp(t);document.getElementById("lu").textContent="Updated: "+new Date().toLocaleTimeString();var btn=document.getElementById("rfBtn");if(btn)btn.style.opacity=.6}
 
-renderGroups();
-doRefresh();
+renderGroups();doRefresh();
 setTimeout(function(){setInterval(doRefresh,10800000)},3000);
 </script>
 </body>

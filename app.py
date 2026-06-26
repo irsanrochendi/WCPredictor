@@ -473,12 +473,27 @@ def api_live():
         save_live_data(data)
     return jsonify(data)
 
-
 @app.route("/api/live/refresh", methods=["POST"])
 def api_live_refresh():
-    """Force refresh live data (in production, this would re-scrape FIFA.com)."""
+    """Force refresh live data."""
     data = generate_sample_data()
     save_live_data(data)
+    return jsonify({"status": "ok", "data": data})
+
+@app.route("/api/groups.js")
+def api_groups_js():
+    """Serve live groups data as JavaScript."""
+    data = load_live_data()
+    if not data:
+        data = generate_sample_data()
+        save_live_data(data)
+    groups_data = {}
+    for gname, teams in data.get("groups", {}).items():
+        letters = {"Grup A":"A","Grup B":"B","Grup C":"C","Grup D":"D","Grup E":"E","Grup F":"F","Grup G":"G","Grup H":"H","Grup I":"I","Grup J":"J","Grup K":"K","Grup L":"L"}
+        letter = letters.get(gname, gname.replace("Grup ",""))
+        groups_data[letter] = teams
+    js_content = "var G = " + json.dumps(groups_data, ensure_ascii=False) + ";"
+    return js_content, 200, {"Content-Type": "application/javascript"}
     return jsonify({"status": "ok", "data": data})
 
 
