@@ -1,13 +1,11 @@
 #!/usr/bin/env python3
-"""Update live standings data from FIFA.com extraction"""
+"""Update live standings & bracket data from FIFA.com"""
 import json, os
 from datetime import datetime
 
 DATA_DIR = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "data")
 DATA_FILE = os.path.join(DATA_DIR, "live_standings.json")
 
-# Live FIFA.com data as of June 29, 2026 (extracted from browser)
-# Source: https://www.fifa.com/id/tournaments/mens/worldcup/canadamexicousa2026/standings
 GROUPS = {
     "Grup A": [
         {"team": "Mexico", "pos": 1, "p": 3, "w": 3, "d": 0, "l": 0, "gf": 6, "ga": 0, "gd": 6, "pts": 9, "status": "qualified"},
@@ -60,7 +58,7 @@ GROUPS = {
     "Grup I": [
         {"team": "France", "pos": 1, "p": 3, "w": 3, "d": 0, "l": 0, "gf": 10, "ga": 2, "gd": 8, "pts": 9, "status": "qualified"},
         {"team": "Norway", "pos": 2, "p": 3, "w": 2, "d": 0, "l": 1, "gf": 8, "ga": 7, "gd": 1, "pts": 6, "status": ""},
-        {"team": "Senegal", "pos": 3, "p": 3, "w": 1, "d": 0, "l": 2, "gf": 8, "ga": 6, "gd": 2, "pts": 3, "status": ""},
+        {"team": "Senegal", "pos": 3, "p": 3, "w": 1, "d": 0, "l": 2, "gf": 8, "ga": 6, "gd": 2, "pts": 3, "status": "eliminated"},
         {"team": "Iraq", "pos": 4, "p": 3, "w": 0, "d": 0, "l": 3, "gf": 1, "ga": 12, "gd": -11, "pts": 0, "status": "eliminated"},
     ],
     "Grup J": [
@@ -83,17 +81,46 @@ GROUPS = {
     ],
 }
 
+# R32 Bracket (from FIFA.com)
+R32 = [
+    {"id": "M73", "home": "South Africa", "away": "Canada", "score_h": 0, "score_a": 1, "date": "29/6", "winner": "Canada"},
+    {"id": "M74", "home": "Germany", "away": "Paraguay", "date": "30/6"},
+    {"id": "M75", "home": "Netherlands", "away": "Morocco", "date": "30/6"},
+    {"id": "M76", "home": "Brazil", "away": "Japan", "date": "30/6"},
+    {"id": "M77", "home": "France", "away": "Sweden", "date": "1/7"},
+    {"id": "M78", "home": "Ivory Coast", "away": "Norway", "date": "1/7"},
+    {"id": "M79", "home": "Mexico", "away": "Ecuador", "date": "1/7"},
+    {"id": "M80", "home": "England", "away": "DR Congo", "date": "1/7"},
+    {"id": "M81", "home": "USA", "away": "Bosnia", "date": "2/7"},
+    {"id": "M82", "home": "Belgium", "away": "Senegal", "date": "2/7"},
+    {"id": "M83", "home": "Portugal", "away": "Croatia", "date": "3/7"},
+    {"id": "M84", "home": "Spain", "away": "Austria", "date": "3/7"},
+    {"id": "M85", "home": "Switzerland", "away": "Algeria", "date": "3/7"},
+    {"id": "M86", "home": "Argentina", "away": "Cape Verde", "date": "4/7"},
+    {"id": "M87", "home": "Colombia", "away": "Ghana", "date": "4/7"},
+    {"id": "M88", "home": "Australia", "away": "Egypt", "date": "4/7"},
+]
+
 os.makedirs(DATA_DIR, exist_ok=True)
 data = {
     "last_updated": datetime.now().isoformat(),
-    "source": "fifa.com (live extract 2026-06-29)",
-    "groups": GROUPS
+    "source": "fifa.com",
+    "groups": GROUPS,
+    "r32": R32
 }
 with open(DATA_FILE, "w", encoding="utf-8") as f:
     json.dump(data, f, indent=2, ensure_ascii=False)
-print(f"Updated {len(GROUPS)} groups")
+
+print(f"Updated {len(GROUPS)} groups + {len(R32)} R32 matches")
 for gname, teams in GROUPS.items():
     print(f"\n{gname}:")
     for t in teams:
-        status = "✅" if t["status"] == "qualified" else "❌" if t["status"] == "eliminated" else ""
-        print(f"  {t['pos']}. {t['team']} - {t['pts']}pts (W{t['w']} D{t['d']} L{t['l']}) {status}")
+        s = "[Q]" if t["status"] == "qualified" else "[E]" if t["status"] == "eliminated" else ""
+        print(f"  {t['pos']}. {t['team']:30s} {t['pts']}pts (W{t['w']} D{t['d']} L{t['l']}) {s}")
+
+print(f"\nR32 Bracket:")
+for m in R32:
+    if m.get("winner"):
+        print(f"  {m['id']}: {m['home']} {m.get('score_h','')}-{m.get('score_a','')} {m['away']} -> {m['winner']}")
+    else:
+        print(f"  {m['id']}: {m['home']} vs {m['away']} ({m['date']})")

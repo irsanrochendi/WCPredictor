@@ -133,20 +133,39 @@ var dr=Math.max(.1,.22-Math.abs(ed)/2000);
 return{hw:bp*(1-dr)*100,dr:dr*100,aw:(1-bp)*(1-dr)*100,w:Math.random()<bp?h:a};
 }
 
+// R32 bracket data from FIFA.com (actual fixtures + results)
+var R32=[{"id":"M73","h":"South Africa","a":"Canada","sh":0,"sa":1,"fn":"Canada"},
+{"id":"M74","h":"Germany","a":"Paraguay"},
+{"id":"M75","h":"Netherlands","a":"Morocco"},
+{"id":"M76","h":"Brazil","a":"Japan"},
+{"id":"M77","h":"France","a":"Sweden"},
+{"id":"M78","h":"Ivory Coast","a":"Norway"},
+{"id":"M79","h":"Mexico","a":"Ecuador"},
+{"id":"M80","h":"England","a":"DR Congo"},
+{"id":"M81","h":"USA","a":"Bosnia"},
+{"id":"M82","h":"Belgium","a":"Senegal"},
+{"id":"M83","h":"Portugal","a":"Croatia"},
+{"id":"M84","h":"Spain","a":"Austria"},
+{"id":"M85","h":"Switzerland","a":"Algeria"},
+{"id":"M86","h":"Argentina","a":"Cape Verde"},
+{"id":"M87","h":"Colombia","a":"Ghana"},
+{"id":"M88","h":"Australia","a":"Egypt"}];
+
 function build(){
-var gw={},gr={},th=[];
-for(var g in G){var t=G[g].slice().sort(function(a,b){return b.pts-a.pts||b.gd-a.gd||b.gf-a.gf});if(t[0])gw[g]=t[0].team;if(t[1])gr[g]=t[1].team;if(t[2])th.push(t[2])}
-th.sort(function(a,b){return b.pts-a.pts||b.gd-a.gd||b.gf-a.gf});
-var s={G:gw.A,rA:gr.A,H:gw.B,rB:gr.B,I:gw.C,rC:gr.C,J:gw.D,rD:gr.D,K:gw.E,rE:gr.E,L:gw.F,rF:gr.F,M:gw.G,rG:gr.G,N:gw.H,rH:gr.H,O:gw.I,rI:gr.I,P:gw.J,rJ:gr.J,Q:gw.K,rK:gr.K,R:gw.L,rL:gr.L,t1:th[0]?th[0].team:"TBD",t2:th[1]?th[1].team:"TBD",t3:th[2]?th[2].team:"TBD",t4:th[3]?th[3].team:"TBD",t5:th[4]?th[4].team:"TBD",t6:th[5]?th[5].team:"TBD",t7:th[6]?th[6].team:"TBD",t8:th[7]?th[7].team:"TBD"};
-var r32=[{id:"M73",h:s.rA,a:s.rB},{id:"M74",h:"Germany",a:s.t1},{id:"M75",h:s.L,a:s.rC},{id:"M76",h:s.I,a:s.rF},{id:"M77",h:s.O,a:s.t2},{id:"M78",h:s.rE,a:s.rI},{id:"M79",h:"Mexico",a:s.t3},{id:"M80",h:s.R,a:s.t4},{id:"M81",h:"USA",a:s.t5},{id:"M82",h:s.M,a:s.t6},{id:"M83",h:s.rK,a:s.rL},{id:"M84",h:s.N,a:s.rJ},{id:"M85",h:s.H,a:s.t7},{id:"M86",h:"Argentina",a:s.rH},{id:"M87",h:s.Q,a:s.t8},{id:"M88",h:s.rD,a:s.rG}];
-for(var i=0;i<16;i++){var p=pred(r32[i].h,r32[i].a);r32[i].w=p.w}
+// Use FIFA.com actual fixtures, only simulate unfinished matches
+var r32_fc=[];
+for(var i=0;i<R32.length;i++){
+  var m=R32[i];
+  if(m.fn){r32_fc.push({id:m.id,h:m.h,a:m.a,sh:m.sh,sa:m.sa,w:m.fn,done:true})}
+  else{var p=pred(m.h,m.a);r32_fc.push({id:m.id,h:m.h,a:m.a,sh:null,sa:null,w:p.w,done:false})}
+}
 var r16=[],qf=[],sf=[],fn;
 var rp=[[1,6],[0,2],[3,4],[5,7],[10,11],[8,9],[13,15],[12,14]];
-for(var i=0;i<8;i++){var m={id:"M"+(89+i),h:r32[rp[i][0]].w,a:r32[rp[i][1]].w};var p=pred(m.h,m.a);m.w=p.w;r16.push(m)}
+for(var i=0;i<8;i++){var m={id:"M"+(89+i),h:r32_fc[rp[i][0]].w,a:r32_fc[rp[i][1]].w};var p=pred(m.h,m.a);m.w=p.w;r16.push(m)}
 for(var i=0;i<4;i++){var m={id:"M"+(97+i),h:r16[[0,4,2,6][i]].w,a:r16[[1,5,3,7][i]].w};var p=pred(m.h,m.a);m.w=p.w;qf.push(m)}
 for(var i=0;i<2;i++){var m={id:"M"+(101+i),h:qf[i*2].w,a:qf[i*2+1].w};var p=pred(m.h,m.a);m.w=p.w;sf.push(m)}
 fn={id:"M103",h:sf[0].w,a:sf[1].w};var p=pred(fn.h,fn.a);fn.w=p.w;
-return{r32:r32,r16:r16,qf:qf,sf:sf,final:fn}
+return{r32:r32_fc,r16:r16,qf:qf,sf:sf,final:fn}
 }
 
 function sim(n){var cc={};for(var t in T)cc[t]=0;for(var s=0;s<n;s++){cc[build().final.w]++}var tb=[];for(var t in T)tb.push({t:t,w:cc[t]/n*100,o:T[t].e,im:100/T[t].o});tb.sort(function(a,b){return b.w-a.w});return tb}
@@ -159,7 +178,27 @@ function renderBracket(b){
 var c=document.getElementById("bc");
 var st=[{l:"32 BESAR",i:b.r32},{l:"16 BESAR",i:b.r16},{l:"8 BESAR",i:b.qf},{l:"SEMI FINAL",i:b.sf},{l:"FINAL",i:[b.final]}];
 var ph=["0px","8px","16px","32px","48px"],h="";
-st.forEach(function(s,idx){h+='<div class="bk" style="padding-top:'+ph[idx]+'"><div class="st">'+s.l+"</div>";s.i.forEach(function(m){var f=idx==4;h+='<div class="mc'+(f?' fm':'')+'"><div class="mn">'+m.id+'</div><div class="tl '+(m.w===m.h?'w':'l')+'"><span>'+m.h+'</span></div><div class="tl '+(m.w===m.a?'w':'l')+'"><span>'+m.a+'</span></div>'+(f?'<div class="pr" style="color:var(--g);font-weight:700">🏆 '+m.w+'</div>':'<div class="pr">→ '+m.w+'</div>')+"</div>"});h+="</div>"});c.innerHTML=h
+st.forEach(function(s,idx){
+  h+='<div class="bk" style="padding-top:'+ph[idx]+'"><div class="st">'+s.l+'</div>';
+  s.i.forEach(function(m){
+    var f=idx==4;
+    var scoreHtml='';
+    if(m.sh!==null&&m.sh!==undefined){scoreHtml='<span style="font-size:.52rem;color:var(--y);display:block;text-align:center">'+m.sh+'-'+m.sa+'</span>'}
+    var cls1=m.w===m.h?'w':'l';
+    var cls2=m.w===m.a?'w':'l';
+    h+='<div class="mc'+(f?' fm':'')+'">';
+    h+='<div class="mn">'+m.id+'</div>';
+    h+='<div class="tl '+cls1+'"><span>'+m.h+'</span></div>';
+    if(scoreHtml){h+=scoreHtml}
+    h+='<div class="tl '+cls2+'"><span>'+m.a+'</span></div>';
+    if(f){h+='<div class="pr" style="color:var(--g);font-weight:700">'+m.w+'</div>'}
+    else if(m.done){h+='<div class="pr" style="color:var(--g)">'+m.w+'</div>'}
+    else{h+='<div class="pr">'+m.w+'</div>'}
+    h+='</div>';
+  });
+  h+='</div>';
+});
+c.innerHTML=h;
 }
 
 function renderProb(t){
