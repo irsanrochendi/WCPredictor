@@ -133,23 +133,36 @@ var dr=Math.max(.1,.22-Math.abs(ed)/2000);
 return{hw:bp*(1-dr)*100,dr:dr*100,aw:(1-bp)*(1-dr)*100,w:Math.random()<bp?h:a};
 }
 
-// R32 bracket data from FIFA.com (actual fixtures + results)
-var R32=[{"id":"M73","h":"South Africa","a":"Canada","sh":0,"sa":1,"fn":"Canada"},
-{"id":"M74","h":"Germany","a":"Paraguay"},
-{"id":"M75","h":"Netherlands","a":"Morocco"},
-{"id":"M76","h":"Brazil","a":"Japan"},
-{"id":"M77","h":"France","a":"Sweden"},
-{"id":"M78","h":"Ivory Coast","a":"Norway"},
-{"id":"M79","h":"Mexico","a":"Ecuador"},
-{"id":"M80","h":"England","a":"DR Congo"},
-{"id":"M81","h":"USA","a":"Bosnia"},
-{"id":"M82","h":"Belgium","a":"Senegal"},
-{"id":"M83","h":"Portugal","a":"Croatia"},
-{"id":"M84","h":"Spain","a":"Austria"},
-{"id":"M85","h":"Switzerland","a":"Algeria"},
-{"id":"M86","h":"Argentina","a":"Cape Verde"},
-{"id":"M87","h":"Colombia","a":"Ghana"},
-{"id":"M88","h":"Australia","a":"Egypt"}];
+// R32 bracket data from FIFA.com (will be updated via API)
+var R32=[];
+
+function loadBracket(){
+fetch('/api/bracket').then(function(r){return r.json()}).then(function(data){
+  if(data.r32 && data.r32.length>0){R32=data.r32;}
+  else{fallbackBracket();}
+}).catch(function(){fallbackBracket();});
+}
+
+function fallbackBracket(){
+  R32=[
+    {"id":"M73","h":"South Africa","a":"Canada","sh":0,"sa":1,"fn":"Canada"},
+    {"id":"M74","h":"Germany","a":"Paraguay"},
+    {"id":"M75","h":"Netherlands","a":"Morocco"},
+    {"id":"M76","h":"Brazil","a":"Japan"},
+    {"id":"M77","h":"France","a":"Sweden"},
+    {"id":"M78","h":"Ivory Coast","a":"Norway"},
+    {"id":"M79","h":"Mexico","a":"Ecuador"},
+    {"id":"M80","h":"England","a":"DR Congo"},
+    {"id":"M81","h":"USA","a":"Bosnia"},
+    {"id":"M82","h":"Belgium","a":"Senegal"},
+    {"id":"M83","h":"Portugal","a":"Croatia"},
+    {"id":"M84","h":"Spain","a":"Austria"},
+    {"id":"M85","h":"Switzerland","a":"Algeria"},
+    {"id":"M86","h":"Argentina","a":"Cape Verde"},
+    {"id":"M87","h":"Colombia","a":"Ghana"},
+    {"id":"M88","h":"Australia","a":"Egypt"}
+  ];
+}
 
 function build(){
 // Use FIFA.com actual fixtures, only simulate unfinished matches
@@ -207,10 +220,25 @@ var c=document.getElementById("pt"),h="";t.slice(0,12).forEach(function(r,i){h+=
 
 function updateChamp(t){var top=t[0];document.getElementById("cn").textContent="🏆 "+top.t;document.getElementById("cs").textContent=top.t+" memimpin "+top.w.toFixed(1)+"% | Odds: "+top.o.toFixed(0)+" ("+top.im.toFixed(1)+" implied)";var td=T[top.t];document.getElementById("cf").innerHTML='<span>Elo:'+td.e+'</span><span>xG:'+td.x.toFixed(1)+'</span><span>Form:'+(td.f*100).toFixed(0)+'%</span><span>Odds:'+td.o.toFixed(0)+'</span>'}
 
-function doRefresh(){var t=sim(20);renderBracket(build());renderProb(t);updateChamp(t);document.getElementById("lu").textContent="Updated: "+new Date().toLocaleTimeString();var btn=document.getElementById("rfBtn");if(btn)btn.style.opacity=.6}
+function doRefresh(){
+// Refresh predictions + bracket from live data
+renderGroups();
+var t=sim(20);
+renderBracket(build());
+renderProb(t);
+updateChamp(t);
+var now=new Date();
+document.getElementById("lu").textContent="Updated: "+now.toLocaleTimeString()+" | Next: 3h";
+var btn=document.getElementById("rfBtn");if(btn){btn.style.opacity="1";btn.textContent="� Refresh"}
+}
 
-renderGroups();doRefresh();
-setTimeout(function(){setInterval(doRefresh,10800000)},3000);
+// Refresh every 3 hours (10800000 ms = 3 hours)
+setInterval(doRefresh,10800000);
+
+// Load bracket from API first, then render
+loadBracket();
+renderGroups();
+doRefresh();
 </script>
 </body>
 </html>

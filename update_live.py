@@ -102,12 +102,11 @@ R32 = [
 ]
 
 os.makedirs(DATA_DIR, exist_ok=True)
-data = {
-    "last_updated": datetime.now().isoformat(),
-    "source": "fifa.com",
-    "groups": GROUPS,
-    "r32": R32
-}
+data = json.load(open(DATA_FILE)) if os.path.exists(DATA_FILE) else {}
+data["last_updated"] = datetime.now().isoformat()
+data["source"] = "fifa.com"
+data["groups"] = GROUPS
+data["r32"] = R32
 with open(DATA_FILE, "w", encoding="utf-8") as f:
     json.dump(data, f, indent=2, ensure_ascii=False)
 

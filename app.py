@@ -494,7 +494,33 @@ def api_groups_js():
         groups_data[letter] = teams
     js_content = "var G = " + json.dumps(groups_data, ensure_ascii=False) + ";"
     return js_content, 200, {"Content-Type": "application/javascript"}
-    return jsonify({"status": "ok", "data": data})
+
+@app.route("/api/bracket")
+def api_bracket():
+    """Get R32 bracket data (fixtures + results)."""
+    data = load_live_data()
+    if data and "r32" in data:
+        return jsonify(data["r32"])
+    # Default R32 data (from FIFA.com)
+    r32 = [
+        {"id":"M73","h":"South Africa","a":"Canada","sh":0,"sa":1,"fn":"Canada"},
+        {"id":"M74","h":"Germany","a":"Paraguay"},
+        {"id":"M75","h":"Netherlands","a":"Morocco"},
+        {"id":"M76","h":"Brazil","a":"Japan"},
+        {"id":"M77","h":"France","a":"Sweden"},
+        {"id":"M78","h":"Ivory Coast","a":"Norway"},
+        {"id":"M79","h":"Mexico","a":"Ecuador"},
+        {"id":"M80","h":"England","a":"DR Congo"},
+        {"id":"M81","h":"USA","a":"Bosnia"},
+        {"id":"M82","h":"Belgium","a":"Senegal"},
+        {"id":"M83","h":"Portugal","a":"Croatia"},
+        {"id":"M84","h":"Spain","a":"Austria"},
+        {"id":"M85","h":"Switzerland","a":"Algeria"},
+        {"id":"M86","h":"Argentina","a":"Cape Verde"},
+        {"id":"M87","h":"Colombia","a":"Ghana"},
+        {"id":"M88","h":"Australia","a":"Egypt"},
+    ]
+    return jsonify({"r32": r32})
 
 
 @app.route("/api/schedule")
